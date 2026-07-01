@@ -35,6 +35,11 @@ output "nat_eip" {
 }
 
 
+output "lbc_role_arn" {
+  description = "IAM role ARN for the AWS Load Balancer Controller"
+  value       = aws_iam_role.lbc.arn
+}
+
 output "kubeconfig_command" {
   description = "Run this to configure kubectl after apply"
   value       = "aws eks update-kubeconfig --region ${var.region} --name ${aws_eks_cluster.main.name}"
