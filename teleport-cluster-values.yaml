@@ -1,0 +1,21 @@
+chartMode: standalone
+
+clusterName: teleport.trentonvanderwert.com
+proxyListenerMode: multiplex
+
+acme: true
+acmeEmail: trenton.vanderwert@gmail.com
+
+persistence:
+  enabled: true
+  storageClassName: teleport-ebs
+  volumeSize: 10Gi
+
+podSecurityPolicy:
+  enabled: false
+
+annotations:
+  service:
+    service.beta.kubernetes.io/aws-load-balancer-type: "external"
+    service.beta.kubernetes.io/aws-load-balancer-scheme: "internet-facing"
+    service.beta.kubernetes.io/aws-load-balancer-nlb-target-type: "ip"
