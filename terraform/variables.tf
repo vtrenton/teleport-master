@@ -28,10 +28,19 @@ variable "node_count" {
   default     = 3
 }
 
-variable "vpc_cidr" {
-  description = "VPC CIDR block"
+variable "vpc_id" {
+  description = "ID of the existing VPC to deploy into"
   type        = string
-  default     = "10.0.0.0/16"
+}
+
+variable "public_subnet_ids" {
+  description = "IDs of existing public subnets (where the Teleport proxy NLB will be provisioned)"
+  type        = list(string)
+}
+
+variable "private_subnet_ids" {
+  description = "IDs of existing private subnets (where worker nodes run)"
+  type        = list(string)
 }
 
 variable "node_tags" {
