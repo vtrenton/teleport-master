@@ -1,5 +1,7 @@
 # ── OIDC Provider (required for IRSA) ─────────────────────────────────────────
 
+data "aws_caller_identity" "current" {}
+
 data "tls_certificate" "cluster" {
   url = aws_eks_cluster.main.identity[0].oidc[0].issuer
 }
@@ -61,6 +63,103 @@ resource "aws_iam_role_policy_attachment" "node_cni_policy" {
 
 resource "aws_iam_role_policy_attachment" "node_ecr_policy" {
   policy_arn = "arn:aws:iam::aws:policy/AmazonEC2ContainerRegistryReadOnly"
+  role       = aws_iam_role.nodes.name
+}
+
+resource "aws_iam_policy" "node_dynamodb" {
+  name = "${var.cluster_name}-node-dynamodb-policy"
+
+  policy = jsonencode({
+    Version = "2012-10-17"
+    Statement = [
+      {
+        Sid    = "ClusterStateStorage"
+        Effect = "Allow"
+        Action = [
+          "dynamodb:BatchWriteItem",
+          "dynamodb:UpdateTimeToLive",
+          "dynamodb:PutItem",
+          "dynamodb:DeleteItem",
+          "dynamodb:Scan",
+          "dynamodb:Query",
+          "dynamodb:DescribeStream",
+          "dynamodb:UpdateItem",
+          "dynamodb:DescribeTimeToLive",
+          "dynamodb:CreateTable",
+          "dynamodb:DescribeTable",
+          "dynamodb:GetShardIterator",
+          "dynamodb:GetItem",
+          "dynamodb:ConditionCheckItem",
+          "dynamodb:UpdateTable",
+          "dynamodb:GetRecords",
+          "dynamodb:UpdateContinuousBackups",
+        ]
+        Resource = [
+          "arn:aws:dynamodb:${var.region}:${data.aws_caller_identity.current.account_id}:table/${var.dynamodb_table_name}",
+          "arn:aws:dynamodb:${var.region}:${data.aws_caller_identity.current.account_id}:table/${var.dynamodb_table_name}/stream/*",
+        ]
+      },
+      {
+        Sid    = "ClusterEventsStorage"
+        Effect = "Allow"
+        Action = [
+          "dynamodb:CreateTable",
+          "dynamodb:BatchWriteItem",
+          "dynamodb:UpdateTimeToLive",
+          "dynamodb:PutItem",
+          "dynamodb:DescribeTable",
+          "dynamodb:DeleteItem",
+          "dynamodb:GetItem",
+          "dynamodb:Scan",
+          "dynamodb:Query",
+          "dynamodb:UpdateItem",
+          "dynamodb:DescribeTimeToLive",
+          "dynamodb:UpdateTable",
+          "dynamodb:UpdateContinuousBackups",
+        ]
+        Resource = [
+          "arn:aws:dynamodb:${var.region}:${data.aws_caller_identity.current.account_id}:table/${var.dynamodb_table_name}",
+          "arn:aws:dynamodb:${var.region}:${data.aws_caller_identity.current.account_id}:table/${var.dynamodb_table_name}/stream/*",
+        ]
+      },
+    ]
+  })
+}
+
+resource "aws_iam_role_policy_attachment" "node_dynamodb" {
+  policy_arn = aws_iam_policy.node_dynamodb.arn
+  role       = aws_iam_role.nodes.name
+}
+
+resource "aws_iam_policy" "node_s3" {
+  name = "${var.cluster_name}-node-s3-policy"
+
+  policy = jsonencode({
+    Version = "2012-10-17"
+    Statement = [
+      {
+        Effect = "Allow"
+        Action = [
+          "s3:PutObject",
+          "s3:GetObject",
+          "s3:ListBucket",
+          "s3:ListBucketVersions",
+          "s3:DeleteObject",
+          "s3:AbortMultipartUpload",
+          "s3:ListBucketMultipartUploads",
+          "s3:GetObjectVersion",
+        ]
+        Resource = [
+          "arn:aws:s3:::${var.s3_bucket_name}",
+          "arn:aws:s3:::${var.s3_bucket_name}/*",
+        ]
+      },
+    ]
+  })
+}
+
+resource "aws_iam_role_policy_attachment" "node_s3" {
+  policy_arn = aws_iam_policy.node_s3.arn
   role       = aws_iam_role.nodes.name
 }
 

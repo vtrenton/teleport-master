@@ -39,3 +39,13 @@ variable "node_tags" {
   type        = map(string)
   default     = {}
 }
+
+variable "dynamodb_table_name" {
+  description = "Name of the DynamoDB table used for Teleport cluster state/events storage"
+  type        = string
+}
+
+variable "s3_bucket_name" {
+  description = "Name of the S3 bucket used for Teleport storage, accessible by worker nodes"
+  type        = string
+}
