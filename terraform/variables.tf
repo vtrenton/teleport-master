@@ -33,3 +33,9 @@ variable "vpc_cidr" {
   type        = string
   default     = "10.0.0.0/16"
 }
+
+variable "node_tags" {
+  description = "Additional tags applied to the EKS worker node EC2 instances and their EBS volumes"
+  type        = map(string)
+  default     = {}
+}

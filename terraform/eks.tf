@@ -18,6 +18,32 @@ resource "aws_eks_cluster" "main" {
   }
 }
 
+resource "aws_launch_template" "nodes" {
+  name_prefix = "${var.cluster_name}-nodes-"
+
+  tag_specifications {
+    resource_type = "instance"
+    tags = merge(
+      { Name = "${var.cluster_name}-nodes" },
+      var.node_tags
+    )
+  }
+
+  tag_specifications {
+    resource_type = "volume"
+    tags          = var.node_tags
+  }
+
+  tags = merge(
+    { Name = "${var.cluster_name}-nodes" },
+    var.node_tags
+  )
+
+  lifecycle {
+    create_before_destroy = true
+  }
+}
+
 resource "aws_eks_node_group" "main" {
   cluster_name    = aws_eks_cluster.main.name
   node_group_name = "${var.cluster_name}-nodes"
@@ -26,6 +52,10 @@ resource "aws_eks_node_group" "main" {
 
   instance_types = [var.node_instance_type]
 
+  launch_template {
+    id      = aws_launch_template.nodes.id
+    version = aws_launch_template.nodes.latest_version
+  }
 
   scaling_config {
     desired_size = var.node_count
@@ -43,7 +73,8 @@ resource "aws_eks_node_group" "main" {
     aws_iam_role_policy_attachment.node_ecr_policy,
   ]
 
-  tags = {
-    Name = "${var.cluster_name}-nodes"
-  }
+  tags = merge(
+    { Name = "${var.cluster_name}-nodes" },
+    var.node_tags
+  )
 }
