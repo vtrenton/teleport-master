@@ -3,7 +3,7 @@ data "aws_vpc" "selected" {
 }
 
 resource "aws_security_group" "nodes" {
-  name        = "${var.cluster_name}-node-sg"
+  name        = "tvanderwert-${var.cluster_name}-node-sg"
   description = "EKS worker node SG - default deny, allow VPC-local TCP/UDP and unrestricted home IP access"
   vpc_id      = var.vpc_id
 
@@ -40,6 +40,6 @@ resource "aws_security_group" "nodes" {
   }
 
   tags = {
-    Name = "${var.cluster_name}-node-sg"
+    Name = "tvanderwert-${var.cluster_name}-node-sg"
   }
 }
