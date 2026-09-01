@@ -1,14 +1,18 @@
+data "aws_vpc" "selected" {
+  id = var.vpc_id
+}
+
 resource "aws_security_group" "nodes" {
   name        = "${var.cluster_name}-node-sg"
   description = "EKS worker node SG - default deny, allow VPC-local TCP/UDP and unrestricted home IP access"
-  vpc_id      = aws_vpc.main.id
+  vpc_id      = var.vpc_id
 
   ingress {
     description = "All TCP within the VPC CIDR"
     from_port   = 0
     to_port     = 65535
     protocol    = "tcp"
-    cidr_blocks = [aws_vpc.main.cidr_block]
+    cidr_blocks = [data.aws_vpc.selected.cidr_block]
   }
 
   ingress {
@@ -16,7 +20,7 @@ resource "aws_security_group" "nodes" {
     from_port   = 0
     to_port     = 65535
     protocol    = "udp"
-    cidr_blocks = [aws_vpc.main.cidr_block]
+    cidr_blocks = [data.aws_vpc.selected.cidr_block]
   }
 
   ingress {
