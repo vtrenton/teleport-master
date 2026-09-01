@@ -33,13 +33,8 @@ variable "vpc_id" {
   type        = string
 }
 
-variable "public_subnet_ids" {
-  description = "IDs of existing public subnets (where the Teleport proxy NLB will be provisioned)"
-  type        = list(string)
-}
-
-variable "private_subnet_ids" {
-  description = "IDs of existing private subnets (where worker nodes run)"
+variable "subnet_ids" {
+  description = "IDs of existing subnets to deploy into, spanning at least 2 AZs (required by EKS for the control plane) - used for the cluster, node group, and Teleport proxy NLB"
   type        = list(string)
 }
 

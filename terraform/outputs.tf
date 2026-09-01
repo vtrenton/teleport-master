@@ -19,14 +19,9 @@ output "vpc_id" {
   value       = var.vpc_id
 }
 
-output "public_subnet_ids" {
-  description = "Public subnet IDs (where the Teleport proxy NLB will be provisioned)"
-  value       = var.public_subnet_ids
-}
-
-output "private_subnet_ids" {
-  description = "Private subnet IDs (where worker nodes run)"
-  value       = var.private_subnet_ids
+output "subnet_ids" {
+  description = "Subnet IDs used for the cluster, node group, and Teleport proxy NLB"
+  value       = var.subnet_ids
 }
 
 output "lbc_role_arn" {

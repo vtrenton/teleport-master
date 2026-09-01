@@ -4,9 +4,10 @@ resource "aws_eks_cluster" "main" {
   role_arn = aws_iam_role.cluster.arn
 
   vpc_config {
-    subnet_ids              = concat(var.public_subnet_ids, var.private_subnet_ids)
+    subnet_ids              = var.subnet_ids
     endpoint_private_access = true
     endpoint_public_access  = true
+    public_access_cidrs     = ["${var.home_ip}/32"]
   }
 
   depends_on = [
@@ -52,7 +53,7 @@ resource "aws_eks_node_group" "main" {
   cluster_name    = aws_eks_cluster.main.name
   node_group_name = "tvanderwert-${var.cluster_name}-nodes"
   node_role_arn   = aws_iam_role.nodes.arn
-  subnet_ids      = var.private_subnet_ids
+  subnet_ids      = var.subnet_ids
 
   instance_types = [var.node_instance_type]
 
