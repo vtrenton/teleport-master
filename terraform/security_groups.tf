@@ -9,7 +9,7 @@ resource "aws_security_group" "nodes" {
   vpc_id      = var.vpc_id
 
   ingress {
-    description = "All TCP from each in-use subnet's actual CIDR"
+    description = "All TCP from the actual CIDR of each subnet in use"
     from_port   = 0
     to_port     = 65535
     protocol    = "tcp"
@@ -17,7 +17,7 @@ resource "aws_security_group" "nodes" {
   }
 
   ingress {
-    description = "All UDP from each in-use subnet's actual CIDR"
+    description = "All UDP from the actual CIDR of each subnet in use"
     from_port   = 0
     to_port     = 65535
     protocol    = "udp"
