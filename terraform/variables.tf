@@ -49,3 +49,8 @@ variable "s3_bucket_name" {
   description = "Name of the S3 bucket used for Teleport storage, accessible by worker nodes"
   type        = string
 }
+
+variable "home_ip" {
+  description = "Home public IP address (no CIDR suffix) granted unrestricted access to worker nodes"
+  type        = string
+}

@@ -21,6 +21,10 @@ resource "aws_eks_cluster" "main" {
 resource "aws_launch_template" "nodes" {
   name_prefix = "${var.cluster_name}-nodes-"
 
+  network_interfaces {
+    security_groups = [aws_security_group.nodes.id]
+  }
+
   tag_specifications {
     resource_type = "instance"
     tags = merge(
