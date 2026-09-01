@@ -1,5 +1,6 @@
-data "aws_vpc" "selected" {
-  id = var.vpc_id
+data "aws_subnet" "nodes" {
+  for_each = toset(var.subnet_ids)
+  id       = each.value
 }
 
 resource "aws_security_group" "nodes" {
@@ -8,19 +9,19 @@ resource "aws_security_group" "nodes" {
   vpc_id      = var.vpc_id
 
   ingress {
-    description = "All TCP within the VPC CIDR"
+    description = "All TCP from each in-use subnet's actual CIDR"
     from_port   = 0
     to_port     = 65535
     protocol    = "tcp"
-    cidr_blocks = [data.aws_vpc.selected.cidr_block]
+    cidr_blocks = [for s in data.aws_subnet.nodes : s.cidr_block]
   }
 
   ingress {
-    description = "All UDP within the VPC CIDR"
+    description = "All UDP from each in-use subnet's actual CIDR"
     from_port   = 0
     to_port     = 65535
     protocol    = "udp"
-    cidr_blocks = [data.aws_vpc.selected.cidr_block]
+    cidr_blocks = [for s in data.aws_subnet.nodes : s.cidr_block]
   }
 
   ingress {
@@ -41,5 +42,39 @@ resource "aws_security_group" "nodes" {
 
   tags = {
     Name = "${var.cluster_name}-node-sg"
+  }
+}
+
+resource "aws_security_group" "cluster" {
+  name        = "${var.cluster_name}-cluster-sg"
+  description = "EKS control plane SG - explicit access to/from worker nodes"
+  vpc_id      = var.vpc_id
+
+  ingress {
+    description     = "Nodes to control plane API"
+    from_port       = 443
+    to_port         = 443
+    protocol        = "tcp"
+    security_groups = [aws_security_group.nodes.id]
+  }
+
+  egress {
+    description     = "Control plane to node kubelet API"
+    from_port       = 10250
+    to_port         = 10250
+    protocol        = "tcp"
+    security_groups = [aws_security_group.nodes.id]
+  }
+
+  egress {
+    description     = "Control plane to node webhooks/extension API servers"
+    from_port       = 443
+    to_port         = 443
+    protocol        = "tcp"
+    security_groups = [aws_security_group.nodes.id]
+  }
+
+  tags = {
+    Name = "${var.cluster_name}-cluster-sg"
   }
 }
