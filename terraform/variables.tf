@@ -44,8 +44,13 @@ variable "node_tags" {
   default     = {}
 }
 
-variable "dynamodb_table_name" {
-  description = "Name of the DynamoDB table used for Teleport cluster state/events storage"
+variable "dynamodb_backend_table_name" {
+  description = "Name of the DynamoDB table used for Teleport cluster state (backend) storage"
+  type        = string
+}
+
+variable "dynamodb_events_table_name" {
+  description = "Name of the DynamoDB table used for Teleport cluster events storage"
   type        = string
 }
 
