@@ -40,6 +40,11 @@ output "lbc_role_arn" {
   value       = aws_iam_role.lbc.arn
 }
 
+output "teleport_storage_role_arn" {
+  description = "IAM role ARN for S3/DynamoDB access - set as annotations.serviceAccount[\"eks.amazonaws.com/role-arn\"] in the teleport-cluster Helm values, with serviceAccount.name set to \"teleportstorage\" (namespace \"teleport\") - covers both the auth and auto-suffixed \"-proxy\" ServiceAccounts the chart creates"
+  value       = aws_iam_role.teleport_storage.arn
+}
+
 output "kubeconfig_command" {
   description = "Run this to configure kubectl after apply"
   value       = "aws eks update-kubeconfig --region ${var.region} --name ${aws_eks_cluster.main.name}"

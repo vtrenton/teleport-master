@@ -66,8 +66,37 @@ resource "aws_iam_role_policy_attachment" "node_ecr_policy" {
   role       = aws_iam_role.nodes.name
 }
 
-resource "aws_iam_policy" "node_dynamodb" {
-  name = "${var.cluster_name}-node-dynamodb-policy"
+# ── Teleport Storage Role (S3 + DynamoDB via IRSA) ─────────────────────────────
+# Scoped to the auth ("teleportstorage") and proxy ("teleportstorage-proxy")
+# ServiceAccounts in the "teleport" namespace - both created by the
+# teleport-cluster Helm chart when serviceAccount.name is set to
+# "teleportstorage" - rather than the node role, so only Teleport's own pods
+# get S3/DynamoDB access, not every pod on the node.
+
+resource "aws_iam_role" "teleport_storage" {
+  name = "${var.cluster_name}-teleport-storage-role"
+
+  assume_role_policy = jsonencode({
+    Version = "2012-10-17"
+    Statement = [{
+      Effect    = "Allow"
+      Principal = { Federated = aws_iam_openid_connect_provider.cluster.arn }
+      Action    = "sts:AssumeRoleWithWebIdentity"
+      Condition = {
+        StringEquals = {
+          "${local.oidc_issuer}:sub" = [
+            "system:serviceaccount:teleport:teleportstorage",
+            "system:serviceaccount:teleport:teleportstorage-proxy",
+          ]
+          "${local.oidc_issuer}:aud" = "sts.amazonaws.com"
+        }
+      }
+    }]
+  })
+}
+
+resource "aws_iam_policy" "teleport_dynamodb" {
+  name = "${var.cluster_name}-teleport-dynamodb-policy"
 
   policy = jsonencode({
     Version = "2012-10-17"
@@ -126,13 +155,13 @@ resource "aws_iam_policy" "node_dynamodb" {
   })
 }
 
-resource "aws_iam_role_policy_attachment" "node_dynamodb" {
-  policy_arn = aws_iam_policy.node_dynamodb.arn
-  role       = aws_iam_role.nodes.name
+resource "aws_iam_role_policy_attachment" "teleport_dynamodb" {
+  policy_arn = aws_iam_policy.teleport_dynamodb.arn
+  role       = aws_iam_role.teleport_storage.name
 }
 
-resource "aws_iam_policy" "node_s3" {
-  name = "${var.cluster_name}-node-s3-policy"
+resource "aws_iam_policy" "teleport_s3" {
+  name = "${var.cluster_name}-teleport-s3-policy"
 
   policy = jsonencode({
     Version = "2012-10-17"
@@ -158,9 +187,9 @@ resource "aws_iam_policy" "node_s3" {
   })
 }
 
-resource "aws_iam_role_policy_attachment" "node_s3" {
-  policy_arn = aws_iam_policy.node_s3.arn
-  role       = aws_iam_role.nodes.name
+resource "aws_iam_role_policy_attachment" "teleport_s3" {
+  policy_arn = aws_iam_policy.teleport_s3.arn
+  role       = aws_iam_role.teleport_storage.name
 }
 
 # ── EBS CSI Driver Role ────────────────────────────────────────────────────────
