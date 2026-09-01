@@ -63,3 +63,9 @@ variable "home_ip" {
   description = "Home public IP address (no CIDR suffix) granted unrestricted access to worker nodes"
   type        = string
 }
+
+variable "node_key_name" {
+  description = "Name for the AWS EC2 key pair used by worker nodes. Defaults to \"<cluster_name>-nodes-key\" if unset."
+  type        = string
+  default     = null
+}

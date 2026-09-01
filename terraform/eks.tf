@@ -1,5 +1,5 @@
 resource "aws_eks_cluster" "main" {
-  name     = "tvanderwert-${var.cluster_name}"
+  name     = var.cluster_name
   version  = var.cluster_version
   role_arn = aws_iam_role.cluster.arn
 
@@ -15,12 +15,13 @@ resource "aws_eks_cluster" "main" {
   ]
 
   tags = {
-    Name = "tvanderwert-${var.cluster_name}"
+    Name = var.cluster_name
   }
 }
 
 resource "aws_launch_template" "nodes" {
-  name_prefix = "tvanderwert-${var.cluster_name}-nodes-"
+  name_prefix = "${var.cluster_name}-nodes-"
+  key_name    = aws_key_pair.nodes.key_name
 
   network_interfaces {
     security_groups = [aws_security_group.nodes.id]
@@ -29,7 +30,7 @@ resource "aws_launch_template" "nodes" {
   tag_specifications {
     resource_type = "instance"
     tags = merge(
-      { Name = "tvanderwert-${var.cluster_name}-nodes" },
+      { Name = "${var.cluster_name}-nodes" },
       var.node_tags
     )
   }
@@ -40,7 +41,7 @@ resource "aws_launch_template" "nodes" {
   }
 
   tags = merge(
-    { Name = "tvanderwert-${var.cluster_name}-nodes" },
+    { Name = "${var.cluster_name}-nodes" },
     var.node_tags
   )
 
@@ -51,7 +52,7 @@ resource "aws_launch_template" "nodes" {
 
 resource "aws_eks_node_group" "main" {
   cluster_name    = aws_eks_cluster.main.name
-  node_group_name = "tvanderwert-${var.cluster_name}-nodes"
+  node_group_name = "${var.cluster_name}-nodes"
   node_role_arn   = aws_iam_role.nodes.arn
   subnet_ids      = var.subnet_ids
 
@@ -79,7 +80,7 @@ resource "aws_eks_node_group" "main" {
   ]
 
   tags = merge(
-    { Name = "tvanderwert-${var.cluster_name}-nodes" },
+    { Name = "${var.cluster_name}-nodes" },
     var.node_tags
   )
 }

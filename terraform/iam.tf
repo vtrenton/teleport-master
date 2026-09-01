@@ -19,7 +19,7 @@ locals {
 # ── Cluster Role ───────────────────────────────────────────────────────────────
 
 resource "aws_iam_role" "cluster" {
-  name = "tvanderwert-${var.cluster_name}-cluster-role"
+  name = "${var.cluster_name}-cluster-role"
 
   assume_role_policy = jsonencode({
     Version = "2012-10-17"
@@ -39,7 +39,7 @@ resource "aws_iam_role_policy_attachment" "cluster_policy" {
 # ── Node Role ──────────────────────────────────────────────────────────────────
 
 resource "aws_iam_role" "nodes" {
-  name = "tvanderwert-${var.cluster_name}-node-role"
+  name = "${var.cluster_name}-node-role"
 
   assume_role_policy = jsonencode({
     Version = "2012-10-17"
@@ -74,7 +74,7 @@ resource "aws_iam_role_policy_attachment" "node_ecr_policy" {
 # get S3/DynamoDB access, not every pod on the node.
 
 resource "aws_iam_role" "teleport_storage" {
-  name = "tvanderwert-${var.cluster_name}-teleport-storage-role"
+  name = "${var.cluster_name}-teleport-storage-role"
 
   assume_role_policy = jsonencode({
     Version = "2012-10-17"
@@ -96,7 +96,7 @@ resource "aws_iam_role" "teleport_storage" {
 }
 
 resource "aws_iam_policy" "teleport_dynamodb" {
-  name = "tvanderwert-${var.cluster_name}-teleport-dynamodb-policy"
+  name = "${var.cluster_name}-teleport-dynamodb-policy"
 
   policy = jsonencode({
     Version = "2012-10-17"
@@ -161,7 +161,7 @@ resource "aws_iam_role_policy_attachment" "teleport_dynamodb" {
 }
 
 resource "aws_iam_policy" "teleport_s3" {
-  name = "tvanderwert-${var.cluster_name}-teleport-s3-policy"
+  name = "${var.cluster_name}-teleport-s3-policy"
 
   policy = jsonencode({
     Version = "2012-10-17"
@@ -195,7 +195,7 @@ resource "aws_iam_role_policy_attachment" "teleport_s3" {
 # ── EBS CSI Driver Role ────────────────────────────────────────────────────────
 
 resource "aws_iam_role" "ebs_csi" {
-  name = "tvanderwert-${var.cluster_name}-ebs-csi-role"
+  name = "${var.cluster_name}-ebs-csi-role"
 
   assume_role_policy = jsonencode({
     Version = "2012-10-17"
@@ -221,7 +221,7 @@ resource "aws_iam_role_policy_attachment" "ebs_csi" {
 # ── AWS Load Balancer Controller Role ─────────────────────────────────────────
 
 resource "aws_iam_role" "lbc" {
-  name = "tvanderwert-${var.cluster_name}-lbc-role"
+  name = "${var.cluster_name}-lbc-role"
 
   assume_role_policy = jsonencode({
     Version = "2012-10-17"
@@ -240,7 +240,7 @@ resource "aws_iam_role" "lbc" {
 }
 
 resource "aws_iam_policy" "lbc" {
-  name = "tvanderwert-${var.cluster_name}-lbc-policy"
+  name = "${var.cluster_name}-lbc-policy"
 
   policy = jsonencode({
     Version = "2012-10-17"
