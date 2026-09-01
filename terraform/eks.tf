@@ -15,9 +15,10 @@ resource "aws_eks_cluster" "main" {
     aws_iam_role_policy_attachment.cluster_policy,
   ]
 
-  tags = {
-    Name = var.cluster_name
-  }
+  tags = merge(
+    { Name = var.cluster_name },
+    var.node_tags
+  )
 }
 
 resource "aws_launch_template" "nodes" {

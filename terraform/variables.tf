@@ -39,7 +39,7 @@ variable "subnet_ids" {
 }
 
 variable "node_tags" {
-  description = "Additional tags applied to the EKS worker node EC2 instances and their EBS volumes"
+  description = "Additional tags applied to the EKS worker node EC2 instances, their EBS volumes, and the EKS cluster itself"
   type        = map(string)
   default     = {}
 }
