@@ -85,8 +85,8 @@ resource "aws_iam_role" "teleport_storage" {
       Condition = {
         StringEquals = {
           "${local.oidc_issuer}:sub" = [
-            "system:serviceaccount:teleport:teleportstorage",
-            "system:serviceaccount:teleport:teleportstorage-proxy",
+            "system:serviceaccount:teleport-cluster:teleportstorage",
+            "system:serviceaccount:teleport-cluster:teleportstorage-proxy",
           ]
           "${local.oidc_issuer}:aud" = "sts.amazonaws.com"
         }
