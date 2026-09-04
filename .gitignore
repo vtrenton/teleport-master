@@ -19,3 +19,9 @@ override.tf
 override.tf.json
 *_override.tf
 *_override.tf.json
+
+# Generated SSH key material
+out/
+
+# Generated Helm values (rendered by terraform from terraform/templates/)
+/teleport-cluster-values.yaml

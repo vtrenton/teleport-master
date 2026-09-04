@@ -64,6 +64,16 @@ variable "home_ip" {
   type        = string
 }
 
+variable "teleport_cluster_domain" {
+  description = "Public DNS name for the Teleport cluster (Helm chart's clusterName) - used to request the ACME/Let's Encrypt certificate"
+  type        = string
+}
+
+variable "acme_email" {
+  description = "Email address registered with Let's Encrypt for ACME certificate notices"
+  type        = string
+}
+
 variable "node_key_name" {
   description = "Name for the AWS EC2 key pair used by worker nodes. Defaults to \"<cluster_name>-nodes-key\" if unset."
   type        = string
