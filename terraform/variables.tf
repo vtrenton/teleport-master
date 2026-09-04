@@ -64,9 +64,15 @@ variable "home_ip" {
   type        = string
 }
 
-variable "teleport_cluster_domain" {
-  description = "Public DNS name for the Teleport cluster (Helm chart's clusterName) - used to request the ACME/Let's Encrypt certificate"
+variable "domain_name" {
+  description = "Root domain (TLD) you own, e.g. \"example.com\" - DNS for it is hosted elsewhere; only teleport_hostname.domain_name is delegated to Route 53"
   type        = string
+}
+
+variable "teleport_hostname" {
+  description = "Hostname label for the Teleport proxy - full name is \"<teleport_hostname>.<domain_name>\", used as the Helm chart's clusterName, its ACME cert name, and the exact Route 53 zone delegated to this stack (add an NS record for it at the current DNS provider, pointing to the route53_zone_name_servers output)"
+  type        = string
+  default     = "teleport"
 }
 
 variable "acme_email" {

@@ -7,7 +7,7 @@ resource "local_file" "teleport_cluster_values" {
 
   content = templatefile("${path.module}/templates/teleport-cluster-values.yaml.tpl", {
     region                      = var.region
-    cluster_domain              = var.teleport_cluster_domain
+    cluster_domain              = local.teleport_cluster_domain
     acme_email                  = var.acme_email
     dynamodb_backend_table_name = var.dynamodb_backend_table_name
     dynamodb_events_table_name  = var.dynamodb_events_table_name

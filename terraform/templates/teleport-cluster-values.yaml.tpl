@@ -26,3 +26,4 @@ annotations:
     service.beta.kubernetes.io/aws-load-balancer-type: "external"
     service.beta.kubernetes.io/aws-load-balancer-scheme: "internet-facing"
     service.beta.kubernetes.io/aws-load-balancer-nlb-target-type: "ip"
+    external-dns.alpha.kubernetes.io/hostname: "${cluster_domain}"

@@ -34,6 +34,21 @@ output "teleport_storage_role_arn" {
   value       = aws_iam_role.teleport_storage.arn
 }
 
+output "route53_zone_name_servers" {
+  description = "Name servers of the (manually created, out-of-band) Route 53 zone this stack looks up - informational only, for verifying NS delegation at the external DNS provider matches; this stack never creates or destroys the zone"
+  value       = data.aws_route53_zone.cluster.name_servers
+}
+
+output "external_dns_role_arn" {
+  description = "IAM role ARN for ExternalDNS (IRSA) - installed via eks-lb-install/install-external-dns.sh, keeps the Teleport proxy's DNS record in sync with the NLB"
+  value       = aws_iam_role.external_dns.arn
+}
+
+output "teleport_cluster_domain" {
+  description = "Full public DNS name for the Teleport proxy - set as the Helm chart's clusterName and its external-dns.alpha.kubernetes.io/hostname service annotation (both already done in the generated teleport-cluster-values.yaml)"
+  value       = local.teleport_cluster_domain
+}
+
 output "kubeconfig_command" {
   description = "Run this to configure kubectl after apply"
   value       = "aws eks update-kubeconfig --region ${var.region} --name ${aws_eks_cluster.main.name}"
