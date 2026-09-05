@@ -37,8 +37,8 @@ the new name first.
 
 ## Load Balancer Controller + ExternalDNS
 ```bash
-./eks-lb-install/install-lbc.sh
-./eks-lb-install/install-external-dns.sh
+./cluster-addons/install-lbc.sh
+./cluster-addons/install-external-dns.sh
 ```
 ExternalDNS watches the Teleport proxy's `Service` (annotated with
 `external-dns.alpha.kubernetes.io/hostname` in the generated Helm values) and

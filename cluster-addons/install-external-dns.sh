@@ -5,9 +5,9 @@ ROOT_DIR="$(cd "$(dirname "$0")/.." && pwd)"
 TERRAFORM_DIR="$ROOT_DIR/terraform"
 
 echo "Fetching values from Terraform outputs..."
-CLUSTER_NAME=$(terraform -chdir="$TERRAFORM_DIR" output -raw cluster_name)
-ROLE_ARN=$(terraform -chdir="$TERRAFORM_DIR" output -raw external_dns_role_arn)
-ZONE_DOMAIN=$(terraform -chdir="$TERRAFORM_DIR" output -raw teleport_cluster_domain)
+CLUSTER_NAME=$(tofu -chdir="$TERRAFORM_DIR" output -raw cluster_name)
+ROLE_ARN=$(tofu -chdir="$TERRAFORM_DIR" output -raw external_dns_role_arn)
+ZONE_DOMAIN=$(tofu -chdir="$TERRAFORM_DIR" output -raw teleport_cluster_domain)
 REGION="${AWS_DEFAULT_REGION:-$(aws configure get region)}"
 
 echo "Cluster:      $CLUSTER_NAME"

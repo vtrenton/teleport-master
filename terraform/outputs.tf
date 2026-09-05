@@ -40,7 +40,7 @@ output "route53_zone_name_servers" {
 }
 
 output "external_dns_role_arn" {
-  description = "IAM role ARN for ExternalDNS (IRSA) - installed via eks-lb-install/install-external-dns.sh, keeps the Teleport proxy's DNS record in sync with the NLB"
+  description = "IAM role ARN for ExternalDNS (IRSA) - installed via cluster-addons/install-external-dns.sh, keeps the Teleport proxy's DNS record in sync with the NLB"
   value       = aws_iam_role.external_dns.arn
 }
 
