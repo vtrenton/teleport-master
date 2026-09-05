@@ -13,6 +13,13 @@ aws:
 acme: true
 acmeEmail: ${acme_email}
 
+# Enterprise license - the "license" Secret itself is provisioned manually
+# (kubectl create secret generic license --from-file=license.pem=/path/to/license.pem
+# -n teleport-cluster) BEFORE `helm install`; never checked into this repo or
+# handled by Terraform.
+enterprise: ${enterprise}
+licenseSecretName: license
+
 podSecurityPolicy:
   enabled: false
 

@@ -13,5 +13,6 @@ resource "local_file" "teleport_cluster_values" {
     dynamodb_events_table_name  = var.dynamodb_events_table_name
     s3_bucket_name              = var.s3_bucket_name
     teleport_storage_role_arn   = aws_iam_role.teleport_storage.arn
+    enterprise                  = var.teleport_enterprise
   })
 }

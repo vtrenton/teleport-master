@@ -80,6 +80,12 @@ variable "acme_email" {
   type        = string
 }
 
+variable "teleport_enterprise" {
+  description = "Use the Teleport Enterprise image and expect a license - if true, create the \"license\" Secret (kubectl create secret generic license --from-file=license.pem=/path/to/license.pem -n teleport-cluster) BEFORE running helm install; the license file itself is never handled by Terraform"
+  type        = bool
+  default     = false
+}
+
 variable "node_key_name" {
   description = "Name for the AWS EC2 key pair used by worker nodes. Defaults to \"<cluster_name>-nodes-key\" if unset."
   type        = string

@@ -45,8 +45,33 @@ ExternalDNS watches the Teleport proxy's `Service` (annotated with
 keeps its DNS record pointed at the AWS Load Balancer Controller's NLB,
 including if the NLB is destroyed and recreated.
 
+## Enterprise license (skip if `teleport_enterprise = false`)
+When `teleport_enterprise = true`, the generated values file sets
+`enterprise: true` and `licenseSecretName: license`, but the license file
+itself is never handled by Terraform or checked into this repo. Provision it
+by hand, once, before `helm install` (the namespace must already exist -
+`--create-namespace` on the Helm install below is too late for this):
+```bash
+kubectl create namespace teleport-cluster
+kubectl create secret generic license \
+  --from-file=license.pem=/path/to/license.pem \
+  -n teleport-cluster
+```
+
 ## Helm Install
 ```bash
 helm install teleport-cluster teleport/teleport-cluster --namespace teleport-cluster --create-namespace --values teleport-cluster-values.yaml
 ```
+
+## First admin user
+The chart doesn't create any users. Bootstrap one via `tctl` inside the auth
+pod once the deployment is up:
+```bash
+kubectl get pods -n teleport-cluster   # find the auth pod, e.g. teleport-cluster-auth-xxxxx
+kubectl exec -it deploy/teleport-cluster-auth -n teleport-cluster -- \
+  tctl users add trent --roles=editor,access --logins=root
+```
+This prints a one-time invite URL (default TTL 1h) - open it in a browser to
+set a password and enroll MFA (required by default), then log in at
+`https://teleport.trentonvanderwert.com` or via `tsh login --proxy=teleport.trentonvanderwert.com`.
 
