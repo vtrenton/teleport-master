@@ -237,12 +237,15 @@ resource "aws_iam_policy" "lbc" {
           "ec2:DescribeVpcs",
           "ec2:DescribeVpcPeeringConnections",
           "ec2:DescribeSubnets",
+          "ec2:DescribeRouteTables",
           "ec2:DescribeSecurityGroups",
           "ec2:DescribeInstances",
           "ec2:DescribeNetworkInterfaces",
           "ec2:DescribeTags",
           "ec2:GetCoipPoolUsage",
           "ec2:DescribeCoipPools",
+          "ec2:GetSecurityGroupsForVpc",
+          "ec2:DescribeIpamPools",
           "elasticloadbalancing:DescribeLoadBalancers",
           "elasticloadbalancing:DescribeLoadBalancerAttributes",
           "elasticloadbalancing:DescribeListeners",
@@ -255,6 +258,7 @@ resource "aws_iam_policy" "lbc" {
           "elasticloadbalancing:DescribeTargetHealth",
           "elasticloadbalancing:DescribeTags",
           "elasticloadbalancing:DescribeTrustStores",
+          "elasticloadbalancing:DescribeCapacityReservation",
           "cognito-idp:DescribeUserPoolClient",
           "acm:ListCertificates",
           "acm:DescribeCertificate",
@@ -262,14 +266,16 @@ resource "aws_iam_policy" "lbc" {
           "iam:GetServerCertificate",
           "wafv2:GetWebACL",
           "wafv2:GetWebACLForResource",
-          "wafv2:ListResourcesForWebACL",
-          "wafv2:ListTagsForResource",
+          "wafv2:AssociateWebACL",
+          "wafv2:DisassociateWebACL",
           "waf-regional:GetWebACLForResource",
           "waf-regional:GetWebACL",
+          "waf-regional:AssociateWebACL",
+          "waf-regional:DisassociateWebACL",
           "shield:GetSubscriptionState",
           "shield:DescribeProtection",
-          "shield:DescribeAttack",
-          "shield:ListAttacks",
+          "shield:CreateProtection",
+          "shield:DeleteProtection",
         ]
         Resource = "*"
       },
@@ -365,6 +371,9 @@ resource "aws_iam_policy" "lbc" {
           "elasticloadbalancing:ModifyTargetGroup",
           "elasticloadbalancing:ModifyTargetGroupAttributes",
           "elasticloadbalancing:DeleteTargetGroup",
+          "elasticloadbalancing:ModifyListenerAttributes",
+          "elasticloadbalancing:ModifyCapacityReservation",
+          "elasticloadbalancing:ModifyIpPools",
         ]
         Resource = "*"
         Condition = {
@@ -397,6 +406,7 @@ resource "aws_iam_policy" "lbc" {
           "elasticloadbalancing:AddListenerCertificates",
           "elasticloadbalancing:RemoveListenerCertificates",
           "elasticloadbalancing:ModifyRule",
+          "elasticloadbalancing:SetRulePriorities",
         ]
         Resource = "*"
       },
