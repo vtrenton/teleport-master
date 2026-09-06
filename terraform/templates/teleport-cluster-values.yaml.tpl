@@ -26,11 +26,23 @@ podSecurityPolicy:
 serviceAccount:
   name: teleportstorage
 
+# serviceAccount role-arn annotation stays at top level deliberately - both
+# the auth ("teleportstorage") and proxy ("teleportstorage-proxy")
+# ServiceAccounts need it, and both inherit top-level `annotations` via the
+# chart's per-component value merge.
 annotations:
   serviceAccount:
     eks.amazonaws.com/role-arn: "${teleport_storage_role_arn}"
-  service:
-    service.beta.kubernetes.io/aws-load-balancer-type: "external"
-    service.beta.kubernetes.io/aws-load-balancer-scheme: "internet-facing"
-    service.beta.kubernetes.io/aws-load-balancer-nlb-target-type: "ip"
-    external-dns.alpha.kubernetes.io/hostname: "${cluster_domain}"
+
+# LBC/ExternalDNS Service annotations, scoped to the proxy's Service ONLY
+# (not top-level `annotations.service`, which the chart also merges onto the
+# internal auth ClusterIP Service - NLB/target-type annotations on a
+# ClusterIP service can confuse the AWS Load Balancer Controller's finalizer
+# handling and get that Service stuck terminating on `helm uninstall`).
+proxy:
+  annotations:
+    service:
+      service.beta.kubernetes.io/aws-load-balancer-type: "external"
+      service.beta.kubernetes.io/aws-load-balancer-scheme: "internet-facing"
+      service.beta.kubernetes.io/aws-load-balancer-nlb-target-type: "ip"
+      external-dns.alpha.kubernetes.io/hostname: "${cluster_domain}"
