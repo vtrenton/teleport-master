@@ -25,3 +25,7 @@ out/
 
 # Generated Helm values (rendered by terraform from terraform/templates/)
 /teleport-cluster-values.yaml
+
+# Teleport Enterprise license - never commit this
+license.pem
+*.license.pem
