@@ -23,17 +23,25 @@ destroy/apply cycle. Instead, create the zone once, by hand, outside this
 project's state:
 ```bash
 aws route53 create-hosted-zone \
-  --name teleport.trentonvanderwert.com \
+  --name aws.trentonvanderwert.com \
   --caller-reference "$(date +%s)"
 ```
 Take the 4 name servers from that command's output (`DelegationSet.NameServers`)
 and, at whatever DNS provider currently hosts `trentonvanderwert.com`, add an
-NS record for `teleport` pointing to them. This zone and its delegation now
+NS record for `aws` pointing to them. This zone and its delegation now
 live independently of this stack - `terraform apply`/`terraform destroy` here
 only look it up (via a data source) and never create, modify, or delete it.
 
-If you ever change `domain_name` or `teleport_hostname`, repeat the above for
-the new name first.
+Note the Teleport hostname (`teleport.aws.trentonvanderwert.com`) lives *one
+level under* this zone's apex, not at it - delegating the zone exactly at the
+record name breaks ExternalDNS's TXT ownership tracking (its ownership
+records are named by rewriting the record's own first label, which only
+stays inside the zone if the record isn't the zone's apex).
+
+If you ever change `domain_name` or `dns_subdomain`, repeat the above for
+the new zone name first. (Migrating from an old zone: remove its NS
+delegation record and, once the new setup is confirmed working, delete the
+old hosted zone.)
 
 ## Load Balancer Controller + ExternalDNS
 ```bash
@@ -73,5 +81,5 @@ kubectl exec -it deploy/teleport-cluster-auth -n teleport-cluster -- \
 ```
 This prints a one-time invite URL (default TTL 1h) - open it in a browser to
 set a password and enroll MFA (required by default), then log in at
-`https://teleport.trentonvanderwert.com` or via `tsh login --proxy=teleport.trentonvanderwert.com`.
+`https://teleport.aws.trentonvanderwert.com` or via `tsh login --proxy=teleport.aws.trentonvanderwert.com`.
 

@@ -34,6 +34,11 @@ output "teleport_storage_role_arn" {
   value       = aws_iam_role.teleport_storage.arn
 }
 
+output "route53_zone_domain" {
+  description = "Domain name of the (manually created, out-of-band) Route 53 zone this stack looks up - pass this as ExternalDNS's domainFilters/txtOwnerId (NOT teleport_cluster_domain, which is one level below the zone apex - that's the point, so ExternalDNS's TXT ownership records have room to exist as children of the zone)"
+  value       = local.zone_domain
+}
+
 output "route53_zone_name_servers" {
   description = "Name servers of the (manually created, out-of-band) Route 53 zone this stack looks up - informational only, for verifying NS delegation at the external DNS provider matches; this stack never creates or destroys the zone"
   value       = data.aws_route53_zone.cluster.name_servers

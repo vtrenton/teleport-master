@@ -7,7 +7,7 @@ TERRAFORM_DIR="$ROOT_DIR/terraform"
 echo "Fetching values from Terraform outputs..."
 CLUSTER_NAME=$(tofu -chdir="$TERRAFORM_DIR" output -raw cluster_name)
 ROLE_ARN=$(tofu -chdir="$TERRAFORM_DIR" output -raw external_dns_role_arn)
-ZONE_DOMAIN=$(tofu -chdir="$TERRAFORM_DIR" output -raw teleport_cluster_domain)
+ZONE_DOMAIN=$(tofu -chdir="$TERRAFORM_DIR" output -raw route53_zone_domain)
 REGION="${AWS_DEFAULT_REGION:-$(aws configure get region)}"
 
 echo "Cluster:      $CLUSTER_NAME"
@@ -28,8 +28,10 @@ helm upgrade --install external-dns external-dns/external-dns \
   --namespace kube-system \
   --set provider.name=aws \
   --set "domainFilters[0]=$ZONE_DOMAIN" \
+  --set registry=txt \
+  --set txtOwnerId="$ZONE_DOMAIN" \
   --set policy=upsert-only \
-  --set txtOwnerId="$CLUSTER_NAME" \
+  --set logLevel=debug \
   --set serviceAccount.create=true \
   --set serviceAccount.name=external-dns \
   --set "serviceAccount.annotations.eks\.amazonaws\.com/role-arn=$ROLE_ARN" \

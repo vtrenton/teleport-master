@@ -70,9 +70,15 @@ variable "domain_name" {
 }
 
 variable "teleport_hostname" {
-  description = "Hostname label for the Teleport proxy - full name is \"<teleport_hostname>.<domain_name>\", used as the Helm chart's clusterName, its ACME cert name, and the exact Route 53 zone delegated to this stack (add an NS record for it at the current DNS provider, pointing to the route53_zone_name_servers output)"
+  description = "Hostname label for the Teleport proxy - full name is \"<teleport_hostname>.<dns_subdomain>.<domain_name>\", used as the Helm chart's clusterName and its ACME cert name"
   type        = string
   default     = "teleport"
+}
+
+variable "dns_subdomain" {
+  description = "Subdomain label delegated to its own Route 53 hosted zone (zone name is \"<dns_subdomain>.<domain_name>\", e.g. \"aws.trentonvanderwert.com\") - the Teleport hostname lives one level under this zone so ExternalDNS's TXT ownership records have room to exist as children of the zone instead of colliding with the zone apex"
+  type        = string
+  default     = "aws"
 }
 
 variable "acme_email" {
