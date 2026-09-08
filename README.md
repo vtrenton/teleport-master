@@ -83,3 +83,20 @@ This prints a one-time invite URL (default TTL 1h) - open it in a browser to
 set a password and enroll MFA (required by default), then log in at
 `https://teleport.aws.trentonvanderwert.com` or via `tsh login --proxy=teleport.aws.trentonvanderwert.com`.
 
+## Tearing down
+Always uninstall the Helm release *before* `terraform destroy`:
+```bash
+helm uninstall teleport-cluster --namespace teleport-cluster
+```
+The Teleport proxy `Service` is a `LoadBalancer` type, so the AWS Load
+Balancer Controller manages an NLB plus two security groups for it (an
+auto-created frontend SG and a cluster-wide shared backend SG,
+`k8s-traffic-<cluster_name>-<hash>`) entirely outside Terraform's state - LBC
+creates and deletes these itself via a finalizer on the Service, which only
+gets to run if the Service is deleted while the cluster (and the LBC pod
+running in it) is still up. If the cluster or VPC is torn down first, this
+finalizer never runs and the NLB plus both security groups are orphaned -
+find and delete them by hand in the AWS console/CLI (tagged
+`elbv2.k8s.aws/cluster: <cluster_name>`) before subnets/VPC deletion will
+succeed.
+
