@@ -14,6 +14,14 @@ DynamoDB/S3 backend names, and IRSA role ARN for `chartMode: aws`. The file is
 generated, not tracked in git - re-run `terraform apply` after changing the
 relevant variables to regenerate it.
 
+## Kubeconfig
+```bash
+aws eks update-kubeconfig --region us-east-1 --name teleport-gateway
+```
+Substitute `region`/`cluster_name` if you've overridden their defaults in
+`terraform.tfvars`. Everything below this point (`kubectl`, `helm`) needs
+this run first.
+
 ## DNS delegation (one-time, out of band - do this before the first `terraform apply`)
 This stack gets `terraform destroy`'d and rebuilt often, so the Route 53
 hosted zone is deliberately **not** managed by this Terraform project - a
