@@ -38,6 +38,11 @@ variable "subnet_ids" {
   type        = list(string)
 }
 
+variable "node_security_group_id" {
+  description = "ID of an existing security group (managed out of band of this repo) to attach to worker nodes"
+  type        = string
+}
+
 variable "node_tags" {
   description = "Additional tags applied to the EKS worker node EC2 instances, their EBS volumes, and the EKS cluster itself"
   type        = map(string)
@@ -60,7 +65,7 @@ variable "s3_bucket_name" {
 }
 
 variable "home_ip" {
-  description = "Home public IP address (no CIDR suffix) granted unrestricted access to worker nodes"
+  description = "Home public IP address (no CIDR suffix) granted access to the EKS API endpoint"
   type        = string
 }
 

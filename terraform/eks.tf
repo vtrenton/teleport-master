@@ -26,7 +26,7 @@ resource "aws_launch_template" "nodes" {
   key_name    = aws_key_pair.nodes.key_name
 
   network_interfaces {
-    security_groups = [aws_security_group.nodes.id]
+    security_groups = [var.node_security_group_id]
   }
 
   tag_specifications {
