@@ -148,7 +148,7 @@ resource "aws_iam_policy" "teleport_dynamodb" {
         ]
         Resource = [
           "arn:aws:dynamodb:${var.region}:${data.aws_caller_identity.current.account_id}:table/${var.dynamodb_events_table_name}",
-          "arn:aws:dynamodb:${var.region}:${data.aws_caller_identity.current.account_id}:table/${var.dynamodb_events_table_name}/stream/*",
+          "arn:aws:dynamodb:${var.region}:${data.aws_caller_identity.current.account_id}:table/${var.dynamodb_events_table_name}/index/*",
         ]
       },
     ]
