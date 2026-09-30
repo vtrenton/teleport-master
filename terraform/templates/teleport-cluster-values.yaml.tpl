@@ -10,8 +10,13 @@ aws:
   sessionRecordingBucket: ${s3_bucket_name}
   dynamoAutoScaling: false
 
-acme: true
-acmeEmail: ${acme_email}
+# TLS cert is issued by cert-manager OUT OF BAND from this Helm release
+# (Certificate applied by cluster-addons/install-cert-manager.sh), so
+# `helm upgrade`/`helm uninstall` can never delete or re-trigger it. Don't
+# switch this to highAvailability.certManager - that puts the Certificate
+# back inside the release.
+tls:
+  existingSecretName: ${tls_secret_name}
 
 # Enterprise license - the "license" Secret itself is provisioned manually
 # (kubectl create secret generic license --from-file=license.pem=/path/to/license.pem
@@ -40,6 +45,11 @@ annotations:
 # ClusterIP service can confuse the AWS Load Balancer Controller's finalizer
 # handling and get that Service stuck terminating on `helm uninstall`).
 proxy:
+  # An existing TLS secret satisfies the "proxy pods need a certificate to
+  # be replicated" requirement, which would otherwise default the Proxy to 2
+  # replicas - pin it back to 1 to keep this a single-replica lab deployment.
+  highAvailability:
+    replicaCount: 1
   annotations:
     service:
       service.beta.kubernetes.io/aws-load-balancer-type: "external"

@@ -49,6 +49,16 @@ output "external_dns_role_arn" {
   value       = aws_iam_role.external_dns.arn
 }
 
+output "cert_manager_role_arn" {
+  description = "IAM role ARN for cert-manager (IRSA) - installed via cluster-addons/install-cert-manager.sh, issues the Teleport proxy's TLS cert via Route 53 DNS-01"
+  value       = aws_iam_role.cert_manager.arn
+}
+
+output "teleport_tls_secret_name" {
+  description = "Kubernetes Secret (in the teleport-cluster namespace) holding the cert-manager-issued proxy TLS cert - used by cluster-addons/install-cert-manager.sh and backup-tls-cert.sh"
+  value       = local.teleport_tls_secret_name
+}
+
 output "teleport_cluster_domain" {
   description = "Full public DNS name for the Teleport proxy - set as the Helm chart's clusterName and its external-dns.alpha.kubernetes.io/hostname service annotation (both already done in the generated teleport-cluster-values.yaml)"
   value       = local.teleport_cluster_domain

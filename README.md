@@ -61,6 +61,49 @@ ExternalDNS watches the Teleport proxy's `Service` (annotated with
 keeps its DNS record pointed at the AWS Load Balancer Controller's NLB,
 including if the NLB is destroyed and recreated.
 
+## cert-manager (Route 53 DNS-01)
+```bash
+./cluster-addons/install-cert-manager.sh
+```
+Requires `jq` and `openssl` locally. Run this *before* `helm install` -
+the proxy pod mounts the `teleport-tls` Secret and won't start without it.
+
+The TLS cert is managed by cert-manager **out of band from the
+teleport-cluster Helm release**. Terraform renders the `Certificate` to
+`teleport-certificate.yaml` (repo root, gitignored), this script applies it,
+and the generated Helm values just point Teleport at the resulting Secret
+via `tls.existingSecretName`. So `helm upgrade`/`helm uninstall` never
+touch the cert, and cert-manager only orders a new cert from Let's Encrypt
+when the Secret is missing, invalid, or within 30 days of expiry.
+
+Why not the alternatives:
+- Teleport's built-in ACME (`acme: true`) caches its cert on the proxy
+  pod's local disk, so every pod restart (including every `helm upgrade`)
+  requested a brand new cert and quickly hit Let's Encrypt's
+  duplicate-certificate limit (5/week for the same set of hostnames).
+- The chart's own cert-manager integration (`highAvailability.certManager`)
+  makes the `Certificate` part of the Helm release, so chart/values changes
+  on `helm upgrade` can change its spec (and trigger a reissue), and
+  `helm uninstall` deletes it.
+
+DNS-01 via Route 53 is required because the cert includes
+`*.<clusterName>` (for app access), and Let's Encrypt only issues wildcards
+via DNS-01.
+
+The script installs cert-manager (IRSA-scoped to
+`ChangeResourceRecordSets`/`ListResourceRecordSets` on just the delegated
+zone), applies the `letsencrypt-route53` `ClusterIssuer`, restores a cached
+cert if `backup-tls-cert.sh` saved one on a previous rebuild (checking
+`terraform/out/` first, then Secrets Manager), and then applies the
+`Certificate` and waits for it to be Ready. It's safe to re-run.
+
+**Migrating a live cluster from `highAvailability.certManager`:** run
+`helm upgrade` with the new values *first* (this removes the chart-owned
+`Certificate`; the Secret itself stays), *then* run
+`install-cert-manager.sh`. The script's `Certificate` adopts the existing
+Secret, so nothing is reissued. Running them in the opposite order would let
+`helm upgrade` delete the `Certificate` the script just applied.
+
 ## Enterprise license (skip if `teleport_enterprise = false`)
 When `teleport_enterprise = true`, the generated values file sets
 `enterprise: true` and `licenseSecretName: license`, but the license file
@@ -92,7 +135,18 @@ set a password and enroll MFA (required by default), then log in at
 `https://teleport.aws.trentonvanderwert.com` or via `tsh login --proxy=teleport.aws.trentonvanderwert.com`.
 
 ## Tearing down
-Always uninstall the Helm release *before* `terraform destroy`:
+First, back up the current TLS cert so the next rebuild doesn't have to
+request a new one from Let's Encrypt. The cert isn't part of the Helm
+release, so `helm uninstall` won't remove it. Destroying the cluster will.
+```bash
+./cluster-addons/backup-tls-cert.sh
+```
+This writes both a local copy (`terraform/out/<cluster_name>-teleport-tls.json`,
+already gitignored the same way as the generated node SSH key) and an AWS
+Secrets Manager copy that survives even if this machine doesn't. The next
+`install-cert-manager.sh` run picks it back up automatically.
+
+Then uninstall the Helm release *before* `terraform destroy`:
 ```bash
 helm uninstall teleport-cluster --namespace teleport-cluster
 ```
