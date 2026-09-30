@@ -25,6 +25,10 @@ tls:
 enterprise: ${enterprise}
 licenseSecretName: license
 
+# Enable kubernetes operator for kubernetes native pattern
+operator:
+  enabled: true
+
 podSecurityPolicy:
   enabled: false
 
