@@ -59,4 +59,7 @@ proxy:
       service.beta.kubernetes.io/aws-load-balancer-type: "external"
       service.beta.kubernetes.io/aws-load-balancer-scheme: "internet-facing"
       service.beta.kubernetes.io/aws-load-balancer-nlb-target-type: "ip"
-      external-dns.alpha.kubernetes.io/hostname: "${cluster_domain}"
+      # The wildcard is for Teleport app access (<app>.${cluster_domain});
+      # the cert already covers it (teleport-certificate.yaml.tpl). Both are
+      # alias records to this NLB.
+      external-dns.alpha.kubernetes.io/hostname: "${cluster_domain},*.${cluster_domain}"
