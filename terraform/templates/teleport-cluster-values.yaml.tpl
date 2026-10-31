@@ -62,4 +62,8 @@ proxy:
       # The wildcard is for Teleport app access (<app>.${cluster_domain});
       # the cert already covers it (teleport-certificate.yaml.tpl). Both are
       # alias records to this NLB.
-      external-dns.alpha.kubernetes.io/hostname: "${cluster_domain},*.${cluster_domain}"
+      #
+      # external-dns.kubernetes.io/, not the old external-dns.alpha.kubernetes.io/:
+      # since external-dns v0.22.0 the alpha prefix is ignored unless
+      # --enable-legacy-annotation-prefix is set.
+      external-dns.kubernetes.io/hostname: "${cluster_domain},*.${cluster_domain}"

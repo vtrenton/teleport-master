@@ -60,7 +60,7 @@ output "teleport_tls_secret_name" {
 }
 
 output "teleport_cluster_domain" {
-  description = "Full public DNS name for the Teleport proxy - set as the Helm chart's clusterName and its external-dns.alpha.kubernetes.io/hostname service annotation (both already done in the generated teleport-cluster-values.yaml)"
+  description = "Full public DNS name for the Teleport proxy - set as the Helm chart's clusterName and its external-dns.kubernetes.io/hostname service annotation (both already done in the generated teleport-cluster-values.yaml)"
   value       = local.teleport_cluster_domain
 }
 
