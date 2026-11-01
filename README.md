@@ -57,9 +57,28 @@ old hosted zone.)
 ./cluster-addons/install-external-dns.sh
 ```
 ExternalDNS watches the Teleport proxy's `Service` (annotated with
-`external-dns.alpha.kubernetes.io/hostname` in the generated Helm values) and
-keeps its DNS record pointed at the AWS Load Balancer Controller's NLB,
-including if the NLB is destroyed and recreated.
+`external-dns.kubernetes.io/hostname` in the generated Helm values) and keeps
+its DNS records pointed at the AWS Load Balancer Controller's NLB, including if
+the NLB is destroyed and recreated. Both records are aliases to the NLB:
+
+- `teleport.<dns_subdomain>.<domain_name>`: the proxy.
+- `*.teleport.<dns_subdomain>.<domain_name>`: Teleport application access
+  (`<app>.teleport...`). The cert-manager certificate already covers it
+  (`templates/teleport-certificate.yaml.tpl`).
+
+Notes:
+
+- **Annotation prefix.** Since ExternalDNS v0.22.0 the default prefix is
+  `external-dns.kubernetes.io/`; the old `external-dns.alpha.kubernetes.io/`
+  is ignored unless `--enable-legacy-annotation-prefix` is set. With the old
+  key the debug log only says `No endpoints could be generated from
+  'service/teleport-cluster/teleport-cluster'`, and no record changes.
+- **`policy=upsert-only`** never deletes records: after `tofu destroy` they
+  stay, pointing at a deleted NLB (harmless: NLB names are never reissued), and
+  the next apply updates them. `policy=sync` would remove them instead.
+- If Route 53 ever rejects the wildcard's ownership TXT record
+  (`cname-*.teleport...`), add `--txt-wildcard-replacement=wildcard` to
+  ExternalDNS's `extraArgs` in `cluster-addons/install-external-dns.sh`.
 
 ## cert-manager (Route 53 DNS-01)
 ```bash
