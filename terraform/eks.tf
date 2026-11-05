@@ -1,3 +1,8 @@
+locals {
+  # compact() drops office_ip when it's unset.
+  admin_cidrs = [for ip in compact([var.home_ip, var.office_ip]) : "${ip}/32"]
+}
+
 resource "aws_eks_cluster" "main" {
   name     = var.cluster_name
   version  = var.cluster_version
@@ -8,7 +13,7 @@ resource "aws_eks_cluster" "main" {
     security_group_ids      = [aws_security_group.cluster.id]
     endpoint_private_access = true
     endpoint_public_access  = true
-    public_access_cidrs     = ["${var.home_ip}/32"]
+    public_access_cidrs     = local.admin_cidrs
   }
 
   depends_on = [

@@ -14,6 +14,6 @@ resource "local_file" "teleport_cluster_values" {
     s3_bucket_name              = var.s3_bucket_name
     teleport_storage_role_arn   = aws_iam_role.teleport_storage.arn
     enterprise                  = var.teleport_enterprise
-    home_ip                     = var.home_ip
+    admin_cidrs                 = local.admin_cidrs
   })
 }

@@ -59,7 +59,9 @@ proxy:
   service:
     spec:
       loadBalancerSourceRanges:
-        - "${home_ip}/32"
+%{ for cidr in admin_cidrs ~}
+        - "${cidr}"
+%{ endfor ~}
         - "10.0.0.0/8"
         - "172.16.0.0/12"
         - "192.168.0.0/16"

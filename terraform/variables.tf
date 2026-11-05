@@ -69,6 +69,12 @@ variable "home_ip" {
   type        = string
 }
 
+variable "office_ip" {
+  description = "Office public IP address (no CIDR suffix) granted the same access as home_ip. Optional - leave unset to allow only home_ip"
+  type        = string
+  default     = null
+}
+
 variable "domain_name" {
   description = "Root domain (TLD) you own, e.g. \"example.com\" - DNS for it is hosted elsewhere; only teleport_hostname.domain_name is delegated to Route 53"
   type        = string
