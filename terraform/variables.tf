@@ -65,7 +65,7 @@ variable "s3_bucket_name" {
 }
 
 variable "home_ip" {
-  description = "Home public IP address (no CIDR suffix) granted access to the EKS API endpoint"
+  description = "Home public IP address (no CIDR suffix) granted access to the EKS API endpoint and the Teleport proxy NLB"
   type        = string
 }
 

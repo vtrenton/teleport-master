@@ -54,6 +54,20 @@ proxy:
   # replicas - pin it back to 1 to keep this a single-replica lab deployment.
   highAvailability:
     replicaCount: 1
+  # The AWS Load Balancer Controller builds the NLB security group's inbound
+  # rules from this list, replacing its default of 0.0.0.0/0. The NAT gateway
+  # IPs cover VPC clients using the public hostname: that traffic reaches the
+  # internet-facing NLB from the NAT's public IP, not an RFC1918 address.
+  service:
+    spec:
+      loadBalancerSourceRanges:
+        - "${home_ip}/32"
+%{ for ip in nat_gateway_public_ips ~}
+        - "${ip}/32"
+%{ endfor ~}
+        - "10.0.0.0/8"
+        - "172.16.0.0/12"
+        - "192.168.0.0/16"
   annotations:
     service:
       service.beta.kubernetes.io/aws-load-balancer-type: "external"
