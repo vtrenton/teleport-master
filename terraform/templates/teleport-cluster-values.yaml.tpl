@@ -55,15 +55,15 @@ proxy:
   highAvailability:
     replicaCount: 1
   # The AWS Load Balancer Controller builds the NLB security group's inbound
-  # rules from this list, replacing its default of 0.0.0.0/0. The NAT gateway
-  # IPs cover VPC clients using the public hostname: that traffic reaches the
-  # internet-facing NLB from the NAT's public IP, not an RFC1918 address.
+  # rules from this list, replacing its default of 0.0.0.0/0. VPC clients using
+  # the public hostname reach the internet-facing NLB from their public egress
+  # IP, not an RFC1918 address, so that IP belongs in extra_allowed_cidrs.
   service:
     spec:
       loadBalancerSourceRanges:
         - "${home_ip}/32"
-%{ for ip in nat_gateway_public_ips ~}
-        - "${ip}/32"
+%{ for cidr in extra_allowed_cidrs ~}
+        - "${cidr}"
 %{ endfor ~}
         - "10.0.0.0/8"
         - "172.16.0.0/12"
