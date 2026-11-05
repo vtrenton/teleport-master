@@ -15,6 +15,5 @@ resource "local_file" "teleport_cluster_values" {
     teleport_storage_role_arn   = aws_iam_role.teleport_storage.arn
     enterprise                  = var.teleport_enterprise
     home_ip                     = var.home_ip
-    extra_allowed_cidrs         = var.extra_allowed_cidrs
   })
 }

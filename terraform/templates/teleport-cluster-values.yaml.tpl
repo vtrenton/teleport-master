@@ -55,16 +55,11 @@ proxy:
   highAvailability:
     replicaCount: 1
   # The AWS Load Balancer Controller builds the NLB security group's inbound
-  # rules from this list, replacing its default of 0.0.0.0/0. VPC clients using
-  # the public hostname reach the internet-facing NLB from their public egress
-  # IP, not an RFC1918 address, so that IP belongs in extra_allowed_cidrs.
+  # rules from this list, replacing its default of 0.0.0.0/0.
   service:
     spec:
       loadBalancerSourceRanges:
         - "${home_ip}/32"
-%{ for cidr in extra_allowed_cidrs ~}
-        - "${cidr}"
-%{ endfor ~}
         - "10.0.0.0/8"
         - "172.16.0.0/12"
         - "192.168.0.0/16"

@@ -69,12 +69,6 @@ variable "home_ip" {
   type        = string
 }
 
-variable "extra_allowed_cidrs" {
-  description = "Additional CIDRs allowed to reach the Teleport proxy NLB, e.g. [\"198.51.100.1/32\"] for the VPC's public egress IP"
-  type        = list(string)
-  default     = []
-}
-
 variable "domain_name" {
   description = "Root domain (TLD) you own, e.g. \"example.com\" - DNS for it is hosted elsewhere; only teleport_hostname.domain_name is delegated to Route 53"
   type        = string
