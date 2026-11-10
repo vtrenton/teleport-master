@@ -15,5 +15,7 @@ resource "local_file" "teleport_cluster_values" {
     teleport_storage_role_arn   = aws_iam_role.teleport_storage.arn
     enterprise                  = var.teleport_enterprise
     admin_cidrs                 = local.admin_cidrs
+    # LBC annotation format: "k1=v1,k2=v2"
+    nlb_tags = join(",", [for k, v in var.resource_tags : "${k}=${v}"])
   })
 }

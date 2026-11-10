@@ -70,6 +70,11 @@ proxy:
       service.beta.kubernetes.io/aws-load-balancer-type: "external"
       service.beta.kubernetes.io/aws-load-balancer-scheme: "internet-facing"
       service.beta.kubernetes.io/aws-load-balancer-nlb-target-type: "ip"
+%{ if nlb_tags != "" ~}
+      # var.resource_tags - the NLB, its target groups, and its frontend SG
+      # are created by LBC, not Terraform, so provider default_tags miss them.
+      service.beta.kubernetes.io/aws-load-balancer-additional-resource-tags: "${nlb_tags}"
+%{ endif ~}
       # The wildcard is for Teleport app access (<app>.${cluster_domain});
       # the cert already covers it (teleport-certificate.yaml.tpl). Both are
       # alias records to this NLB.

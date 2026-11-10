@@ -43,10 +43,14 @@ variable "node_security_group_id" {
   type        = string
 }
 
-variable "node_tags" {
-  description = "Additional tags applied to the EKS worker node EC2 instances, their EBS volumes, and the EKS cluster itself"
+variable "resource_tags" {
+  description = "Tags added to every AWS resource Terraform creates (via provider default_tags), plus the worker node EC2 instances, EBS volumes, and ENIs launched by the node group, and the Teleport proxy NLB created by the AWS Load Balancer Controller. Appended to - never replacing - each resource's own tags such as Name. Must include instance_metadata_tagging_req, which security requires on every resource"
   type        = map(string)
-  default     = {}
+
+  validation {
+    condition     = trimspace(lookup(var.resource_tags, "instance_metadata_tagging_req", "")) != ""
+    error_message = "resource_tags must include a non-empty \"instance_metadata_tagging_req\" tag - security deletes resources without it."
+  }
 }
 
 variable "dynamodb_backend_table_name" {

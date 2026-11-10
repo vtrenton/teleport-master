@@ -20,4 +20,11 @@ terraform {
 
 provider "aws" {
   region = var.region
+
+  # Merged onto every taggable resource this provider creates. Resource-level
+  # tags (e.g. Name) are kept alongside these; on a key collision the
+  # resource-level value wins.
+  default_tags {
+    tags = var.resource_tags
+  }
 }

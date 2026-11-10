@@ -56,6 +56,11 @@ old hosted zone.)
 ./cluster-addons/install-lbc.sh
 ./cluster-addons/install-external-dns.sh
 ```
+`install-lbc.sh` passes the `resource_tags` Terraform output to the controller
+as `defaultTags`, so the NLB, target groups, and security groups it creates
+carry the same tags as everything Terraform creates. After changing
+`resource_tags`, run `tofu apply` and then rerun `install-lbc.sh` to update them.
+
 ExternalDNS watches the Teleport proxy's `Service` (annotated with
 `external-dns.kubernetes.io/hostname` in the generated Helm values) and keeps
 its DNS records pointed at the AWS Load Balancer Controller's NLB, including if

@@ -29,6 +29,11 @@ output "lbc_role_arn" {
   value       = aws_iam_role.lbc.arn
 }
 
+output "resource_tags" {
+  description = "var.resource_tags - passed by cluster-addons/install-lbc.sh as the controller's defaultTags so every AWS resource it creates carries them"
+  value       = var.resource_tags
+}
+
 output "teleport_storage_role_arn" {
   description = "IAM role ARN for S3/DynamoDB access - set as annotations.serviceAccount[\"eks.amazonaws.com/role-arn\"] in the teleport-cluster Helm values, with serviceAccount.name set to \"teleportstorage\" (namespace \"teleport\") - covers both the auth and auto-suffixed \"-proxy\" ServiceAccounts the chart creates"
   value       = aws_iam_role.teleport_storage.arn

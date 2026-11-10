@@ -8,12 +8,16 @@ echo "Fetching values from Terraform outputs..."
 CLUSTER_NAME=$(tofu -chdir="$TERRAFORM_DIR" output -raw cluster_name)
 LBC_ROLE_ARN=$(tofu -chdir="$TERRAFORM_DIR" output -raw lbc_role_arn)
 VPC_ID=$(tofu -chdir="$TERRAFORM_DIR" output -raw vpc_id)
+# Applied to every AWS resource the controller creates (NLBs, target groups,
+# and both its frontend and shared backend security groups).
+RESOURCE_TAGS=$(tofu -chdir="$TERRAFORM_DIR" output -json resource_tags)
 REGION="${AWS_DEFAULT_REGION:-$(aws configure get region)}"
 
 echo "Cluster:  $CLUSTER_NAME"
 echo "Role ARN: $LBC_ROLE_ARN"
 echo "VPC ID:   $VPC_ID"
 echo "Region:   $REGION"
+echo "Tags:     $RESOURCE_TAGS"
 echo ""
 
 echo "Updating kubeconfig..."
@@ -30,7 +34,8 @@ helm upgrade --install aws-load-balancer-controller eks/aws-load-balancer-contro
   --set serviceAccount.create=true \
   --set "serviceAccount.annotations.eks\.amazonaws\.com/role-arn=$LBC_ROLE_ARN" \
   --set vpcId="$VPC_ID" \
-  --set region="$REGION"
+  --set region="$REGION" \
+  --set-json "defaultTags=$RESOURCE_TAGS"
 
 echo ""
 echo "Waiting for controller pods to be ready..."
