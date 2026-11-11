@@ -15,10 +15,10 @@
 # The Certificate is deliberately NOT created by the teleport-cluster chart
 # (highAvailability.certManager) - a chart-owned Certificate is at the mercy
 # of every `helm upgrade`/`helm uninstall`. Instead it's rendered here and
-# applied out of band by cluster-addons/install-cert-manager.sh, and the
+# applied out of band by scripts/apply-teleport-cert.sh, and the
 # chart just mounts the Secret via tls.existingSecretName. The only thing
-# that loses it is a full cluster rebuild - see cluster-addons/backup-tls-cert.sh
-# (run before `terraform destroy`) and install-cert-manager.sh's restore step.
+# that loses it is a full cluster rebuild - see scripts/backup-tls-cert.sh
+# (run before `terraform destroy`) and apply-teleport-cert.sh's restore step.
 #
 # It includes "*.<clusterName>" (for Teleport app access subdomains) - Let's
 # Encrypt only issues wildcards via DNS-01, hence Route 53 DNS-01.

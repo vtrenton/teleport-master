@@ -1,0 +1,34 @@
+# Route 53 DNS-01 (IRSA). The ClusterIssuer, the cached-cert restore and the
+# Teleport Certificate are still scripts/apply-teleport-cert.sh.
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: cert-manager
+  namespace: argocd
+spec:
+  project: default
+  source:
+    repoURL: https://charts.jetstack.io
+    chart: cert-manager
+    targetRevision: {{ .Values.versions.certManager | quote }}
+    helm:
+      releaseName: cert-manager
+      valuesObject:
+        crds:
+          enabled: true
+        serviceAccount:
+          create: true
+          name: cert-manager
+          annotations:
+            eks.amazonaws.com/role-arn: {{ required "roles.certManager" .Values.roles.certManager | quote }}
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: cert-manager
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
+    syncOptions:
+      - CreateNamespace=true
+      # cert-manager's CRDs are too large for client-side apply
+      - ServerSideApply=true

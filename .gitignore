@@ -20,7 +20,7 @@ override.tf.json
 *_override.tf
 *_override.tf.json
 
-# Generated SSH key material
+# Local TLS cert backup (scripts/backup-tls-cert.sh)
 out/
 
 # Generated Helm values (rendered by terraform from terraform/templates/)

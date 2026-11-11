@@ -11,7 +11,7 @@ aws:
   dynamoAutoScaling: false
 
 # TLS cert is issued by cert-manager OUT OF BAND from this Helm release
-# (Certificate applied by cluster-addons/install-cert-manager.sh), so
+# (Certificate applied by scripts/apply-teleport-cert.sh), so
 # `helm upgrade`/`helm uninstall` can never delete or re-trigger it. Don't
 # switch this to highAvailability.certManager - that puts the Certificate
 # back inside the release.

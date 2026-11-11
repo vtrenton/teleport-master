@@ -106,9 +106,3 @@ variable "teleport_enterprise" {
   type        = bool
   default     = false
 }
-
-variable "node_key_name" {
-  description = "Name for the AWS EC2 key pair used by worker nodes. Defaults to \"<cluster_name>-nodes-key\" if unset."
-  type        = string
-  default     = null
-}

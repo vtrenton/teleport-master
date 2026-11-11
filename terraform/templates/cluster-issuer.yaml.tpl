@@ -1,5 +1,5 @@
 # Rendered by Terraform (see cert_manager.tf), applied by
-# cluster-addons/install-cert-manager.sh AFTER cert-manager's CRDs exist.
+# scripts/apply-teleport-cert.sh AFTER cert-manager's CRDs exist.
 # Route 53 credentials come from cert-manager's pod via IRSA (ambient
 # credentials) - ClusterIssuers use ambient credentials by default, so no
 # accessKeyID/secretAccessKeySecretRef is needed here.

@@ -1,0 +1,19 @@
+# Chart versions are pinned here. The other values are specific to the AWS
+# account (role ARNs, VPC ID, tags), so they stay out of git:
+# bootstrap/install-argocd.sh reads them from the Terraform outputs and
+# sets them on the root Application.
+
+versions:
+  awsLoadBalancerController: 3.6.2
+  externalDns: 1.23.0
+  certManager: v1.21.3
+
+clusterName: ""
+region: ""
+vpcId: ""
+resourceTags: {}
+zoneDomain: ""
+roles:
+  lbc: ""
+  externalDns: ""
+  certManager: ""

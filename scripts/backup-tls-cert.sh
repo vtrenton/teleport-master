@@ -8,10 +8,10 @@
 # renewal, to keep the cache current).
 #
 # Writes two copies: terraform/out/<cluster_name>-teleport-tls.json (fast
-# path for a rebuild on this same machine, already gitignored the same way
-# as the generated node SSH key) and an AWS Secrets Manager secret of the
-# same name (durable if this machine goes away). install-cert-manager.sh
-# checks the local file first, then falls back to Secrets Manager.
+# path for a rebuild on this same machine, gitignored) and an AWS Secrets
+# Manager secret of the same name (durable if this machine goes away).
+# apply-teleport-cert.sh checks the local file first, then falls back to
+# Secrets Manager.
 set -euo pipefail
 
 ROOT_DIR="$(cd "$(dirname "$0")/.." && pwd)"

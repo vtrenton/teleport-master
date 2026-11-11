@@ -1,0 +1,42 @@
+# Keeps the Teleport proxy's records (from the external-dns.kubernetes.io/hostname
+# annotation on its Service) pointed at the Load Balancer Controller's NLB.
+# upsert-only never deletes records (see the README).
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: external-dns
+  namespace: argocd
+spec:
+  project: default
+  source:
+    repoURL: https://kubernetes-sigs.github.io/external-dns/
+    chart: external-dns
+    targetRevision: {{ .Values.versions.externalDns | quote }}
+    helm:
+      releaseName: external-dns
+      valuesObject:
+        provider:
+          name: aws
+        domainFilters:
+          - {{ required "zoneDomain" .Values.zoneDomain | quote }}
+        registry: txt
+        txtOwnerId: {{ .Values.zoneDomain | quote }}
+        policy: upsert-only
+        logLevel: debug
+        serviceAccount:
+          create: true
+          name: external-dns
+          annotations:
+            eks.amazonaws.com/role-arn: {{ required "roles.externalDns" .Values.roles.externalDns | quote }}
+        env:
+          - name: AWS_DEFAULT_REGION
+            value: {{ .Values.region | quote }}
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: kube-system
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
+    syncOptions:
+      - ServerSideApply=true

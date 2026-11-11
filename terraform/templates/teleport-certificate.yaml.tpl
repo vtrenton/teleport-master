@@ -1,5 +1,5 @@
 # Rendered by Terraform (see cert_manager.tf), applied by
-# cluster-addons/install-cert-manager.sh - deliberately NOT part of the
+# scripts/apply-teleport-cert.sh - deliberately NOT part of the
 # teleport-cluster Helm release, so `helm upgrade`/`helm uninstall` never
 # touch it. Teleport just mounts the resulting Secret via
 # tls.existingSecretName.

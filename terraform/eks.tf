@@ -27,7 +27,6 @@ resource "aws_eks_cluster" "main" {
 
 resource "aws_launch_template" "nodes" {
   name_prefix = "${var.cluster_name}-nodes-"
-  key_name    = aws_key_pair.nodes.key_name
 
   network_interfaces {
     security_groups = [var.node_security_group_id]

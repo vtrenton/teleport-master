@@ -30,7 +30,7 @@ output "lbc_role_arn" {
 }
 
 output "resource_tags" {
-  description = "var.resource_tags - passed by cluster-addons/install-lbc.sh as the controller's defaultTags so every AWS resource it creates carries them"
+  description = "var.resource_tags - passed by bootstrap/install-argocd.sh as the Load Balancer Controller's defaultTags so every AWS resource it creates carries them"
   value       = var.resource_tags
 }
 
@@ -50,17 +50,17 @@ output "route53_zone_name_servers" {
 }
 
 output "external_dns_role_arn" {
-  description = "IAM role ARN for ExternalDNS (IRSA) - installed via cluster-addons/install-external-dns.sh, keeps the Teleport proxy's DNS record in sync with the NLB"
+  description = "IAM role ARN for ExternalDNS (IRSA) - passed to ExternalDNS by bootstrap/install-argocd.sh; keeps the Teleport proxy's DNS record in sync with the NLB"
   value       = aws_iam_role.external_dns.arn
 }
 
 output "cert_manager_role_arn" {
-  description = "IAM role ARN for cert-manager (IRSA) - installed via cluster-addons/install-cert-manager.sh, issues the Teleport proxy's TLS cert via Route 53 DNS-01"
+  description = "IAM role ARN for cert-manager (IRSA) - passed to cert-manager by bootstrap/install-argocd.sh; issues the Teleport proxy's TLS cert via Route 53 DNS-01"
   value       = aws_iam_role.cert_manager.arn
 }
 
 output "teleport_tls_secret_name" {
-  description = "Kubernetes Secret (in the teleport-cluster namespace) holding the cert-manager-issued proxy TLS cert - used by cluster-addons/install-cert-manager.sh and backup-tls-cert.sh"
+  description = "Kubernetes Secret (in the teleport-cluster namespace) holding the cert-manager-issued proxy TLS cert - used by scripts/apply-teleport-cert.sh and backup-tls-cert.sh"
   value       = local.teleport_tls_secret_name
 }
 

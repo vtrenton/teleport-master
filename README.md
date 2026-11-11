@@ -51,15 +51,26 @@ the new zone name first. (Migrating from an old zone: remove its NS
 delegation record and, once the new setup is confirmed working, delete the
 old hosted zone.)
 
-## Load Balancer Controller + ExternalDNS
+## Argo CD: Load Balancer Controller, ExternalDNS, cert-manager
 ```bash
-./cluster-addons/install-lbc.sh
-./cluster-addons/install-external-dns.sh
+./bootstrap/install-argocd.sh
+kubectl -n argocd get applications     # wait for all three: Synced, Healthy
 ```
-`install-lbc.sh` passes the `resource_tags` Terraform output to the controller
-as `defaultTags`, so the NLB, target groups, and security groups it creates
-carry the same tags as everything Terraform creates. After changing
-`resource_tags`, run `tofu apply` and then rerun `install-lbc.sh` to update them.
+The script installs Argo CD (Helm), then the `addons` root Application, which
+deploys the three add-ons from `argo/addons/` in this repo on GitHub (the
+branch checked out here, or `ARGO_REVISION`; push before running it). Chart
+versions and settings live in `argo/addons/`. The values specific to the AWS
+account (role ARNs, VPC ID, `resource_tags`) come from the Terraform outputs
+and are set on the root Application, so they never go into git. Re-run the
+script after a `tofu apply` that changes them, e.g. `resource_tags`.
+
+The controller gets `resource_tags` as `defaultTags`, so the NLB, target
+groups, and security groups it creates carry the same tags as everything
+Terraform creates.
+
+Argo CD UI: `kubectl -n argocd port-forward svc/argocd-server 8080:443`, user
+`admin`, password from the `argocd-initial-admin-secret` Secret (the script
+prints the command).
 
 ExternalDNS watches the Teleport proxy's `Service` (annotated with
 `external-dns.kubernetes.io/hostname` in the generated Helm values) and keeps
@@ -83,11 +94,11 @@ Notes:
   the next apply updates them. `policy=sync` would remove them instead.
 - If Route 53 ever rejects the wildcard's ownership TXT record
   (`cname-*.teleport...`), add `--txt-wildcard-replacement=wildcard` to
-  ExternalDNS's `extraArgs` in `cluster-addons/install-external-dns.sh`.
+  ExternalDNS's `extraArgs` in `argo/addons/templates/external-dns.yaml`.
 
-## cert-manager (Route 53 DNS-01)
+## Teleport certificate (Route 53 DNS-01)
 ```bash
-./cluster-addons/install-cert-manager.sh
+./scripts/apply-teleport-cert.sh
 ```
 Requires `jq` and `openssl` locally. Run this *before* `helm install` -
 the proxy pod mounts the `teleport-tls` Secret and won't start without it.
@@ -114,9 +125,10 @@ DNS-01 via Route 53 is required because the cert includes
 `*.<clusterName>` (for app access), and Let's Encrypt only issues wildcards
 via DNS-01.
 
-The script installs cert-manager (IRSA-scoped to
+cert-manager itself comes from Argo CD (IRSA-scoped to
 `ChangeResourceRecordSets`/`ListResourceRecordSets` on just the delegated
-zone), applies the `letsencrypt-route53` `ClusterIssuer`, restores a cached
+zone). The script waits for it, applies the `letsencrypt-route53`
+`ClusterIssuer`, restores a cached
 cert if `backup-tls-cert.sh` saved one on a previous rebuild (checking
 `terraform/out/` first, then Secrets Manager), and then applies the
 `Certificate` and waits for it to be Ready. It's safe to re-run.
@@ -124,7 +136,7 @@ cert if `backup-tls-cert.sh` saved one on a previous rebuild (checking
 **Migrating a live cluster from `highAvailability.certManager`:** run
 `helm upgrade` with the new values *first* (this removes the chart-owned
 `Certificate`; the Secret itself stays), *then* run
-`install-cert-manager.sh`. The script's `Certificate` adopts the existing
+`apply-teleport-cert.sh`. The script's `Certificate` adopts the existing
 Secret, so nothing is reissued. Running them in the opposite order would let
 `helm upgrade` delete the `Certificate` the script just applied.
 
@@ -163,12 +175,12 @@ First, back up the current TLS cert so the next rebuild doesn't have to
 request a new one from Let's Encrypt. The cert isn't part of the Helm
 release, so `helm uninstall` won't remove it. Destroying the cluster will.
 ```bash
-./cluster-addons/backup-tls-cert.sh
+./scripts/backup-tls-cert.sh
 ```
 This writes both a local copy (`terraform/out/<cluster_name>-teleport-tls.json`,
-already gitignored the same way as the generated node SSH key) and an AWS
+gitignored) and an AWS
 Secrets Manager copy that survives even if this machine doesn't. The next
-`install-cert-manager.sh` run picks it back up automatically.
+`apply-teleport-cert.sh` run picks it back up automatically.
 
 Then uninstall the Helm release *before* `terraform destroy`:
 ```bash

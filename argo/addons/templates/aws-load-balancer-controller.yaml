@@ -1,0 +1,35 @@
+# Builds the NLB for the Teleport proxy Service. defaultTags (Terraform's
+# resource_tags) go on every AWS resource it creates: NLBs, target groups, and
+# both its frontend and shared backend security groups.
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: aws-load-balancer-controller
+  namespace: argocd
+spec:
+  project: default
+  source:
+    repoURL: https://aws.github.io/eks-charts
+    chart: aws-load-balancer-controller
+    targetRevision: {{ .Values.versions.awsLoadBalancerController | quote }}
+    helm:
+      releaseName: aws-load-balancer-controller
+      valuesObject:
+        clusterName: {{ required "clusterName" .Values.clusterName | quote }}
+        region: {{ required "region" .Values.region | quote }}
+        vpcId: {{ required "vpcId" .Values.vpcId | quote }}
+        serviceAccount:
+          create: true
+          annotations:
+            eks.amazonaws.com/role-arn: {{ required "roles.lbc" .Values.roles.lbc | quote }}
+        defaultTags:
+          {{- required "resourceTags" .Values.resourceTags | toYaml | nindent 10 }}
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: kube-system
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
+    syncOptions:
+      - ServerSideApply=true
