@@ -2,7 +2,7 @@
 #
 # The built-in client (the old `acme: true` / `acmeEmail` values) caches its
 # certificate locally on the single Proxy pod, not in the shared DynamoDB
-# backend - every pod replacement (and definitely every `terraform destroy`
+# backend - every pod replacement (and definitely every `tofu destroy`
 # rebuild of this stack) loses that cache and requests a brand new
 # certificate from Let's Encrypt, which is what was hitting the "duplicate
 # certificate" rate limit (5/week per exact hostname) on repeated
@@ -18,7 +18,7 @@
 # applied out of band by scripts/apply-teleport-cert.sh, and the
 # chart just mounts the Secret via tls.existingSecretName. The only thing
 # that loses it is a full cluster rebuild - see scripts/backup-tls-cert.sh
-# (run before `terraform destroy`) and apply-teleport-cert.sh's restore step.
+# (run before `tofu destroy`) and apply-teleport-cert.sh's restore step.
 #
 # It includes "*.<clusterName>" (for Teleport app access subdomains) - Let's
 # Encrypt only issues wildcards via DNS-01, hence Route 53 DNS-01.

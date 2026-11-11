@@ -38,7 +38,7 @@ kubectl rollout status deployment/cert-manager -n cert-manager --timeout=120s
 kubectl rollout status deployment/cert-manager-webhook -n cert-manager --timeout=120s
 
 echo ""
-echo "Applying ClusterIssuer (rendered by 'terraform apply' to $ROOT_DIR/cluster-issuer.yaml)..."
+echo "Applying ClusterIssuer (rendered by 'tofu apply' to $ROOT_DIR/cluster-issuer.yaml)..."
 kubectl apply -f "$ROOT_DIR/cluster-issuer.yaml"
 
 echo ""
@@ -97,7 +97,7 @@ EOF
 fi
 
 echo ""
-echo "Applying Teleport Certificate (rendered by 'terraform apply' to $ROOT_DIR/teleport-certificate.yaml)..."
+echo "Applying Teleport Certificate (rendered by 'tofu apply' to $ROOT_DIR/teleport-certificate.yaml)..."
 kubectl apply -f "$ROOT_DIR/teleport-certificate.yaml"
 
 echo ""
@@ -106,4 +106,4 @@ kubectl wait --for=condition=Ready "certificate/$K8S_SECRET_NAME" -n "$NAMESPACE
 kubectl get certificate "$K8S_SECRET_NAME" -n "$NAMESPACE"
 
 echo ""
-echo "Done. Back up the cert with ./scripts/backup-tls-cert.sh (now, and before any terraform destroy)."
+echo "Done. Back up the cert with ./scripts/backup-tls-cert.sh (now, and before any tofu destroy)."

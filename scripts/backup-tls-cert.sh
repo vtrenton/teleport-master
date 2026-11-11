@@ -4,7 +4,7 @@
 #
 # The Certificate/Secret live outside the teleport-cluster Helm release, so
 # `helm upgrade`/`helm uninstall` don't affect them - only destroying the
-# cluster does. Run this before `terraform destroy` (and any time after a
+# cluster does. Run this before `tofu destroy` (and any time after a
 # renewal, to keep the cache current).
 #
 # Writes two copies: terraform/out/<cluster_name>-teleport-tls.json (fast
@@ -46,9 +46,9 @@ if aws secretsmanager describe-secret --secret-id "$SECRETS_MANAGER_NAME" --regi
 else
   aws secretsmanager create-secret \
     --name "$SECRETS_MANAGER_NAME" \
-    --description "Cached Teleport proxy TLS cert (tls.crt/tls.key, base64) - survives terraform destroy/rebuild cycles of $CLUSTER_NAME" \
+    --description "Cached Teleport proxy TLS cert (tls.crt/tls.key, base64) - survives tofu destroy/rebuild cycles of $CLUSTER_NAME" \
     --secret-string "$PAYLOAD" \
     --region "$REGION" >/dev/null
 fi
 
-echo "Done. Run this again before every 'terraform destroy' to keep the cache current."
+echo "Done. Run this again before every 'tofu destroy' to keep the cache current."

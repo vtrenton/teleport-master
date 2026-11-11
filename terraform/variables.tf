@@ -1,7 +1,7 @@
 variable "region" {
   description = "AWS region"
   type        = string
-  default     = "us-east-1"
+  default     = "us-west-1"
 }
 
 variable "cluster_name" {
@@ -34,7 +34,7 @@ variable "vpc_id" {
 }
 
 variable "subnet_ids" {
-  description = "IDs of existing subnets to deploy into, spanning at least 2 AZs (required by EKS for the control plane) - used for the cluster, node group, and Teleport proxy NLB"
+  description = "IDs of existing subnets to deploy into, spanning at least 2 AZs (required by EKS for the control plane) - used for the cluster, node group, and Teleport proxy NLB. They must auto-assign public IPv4 (MapPublicIpOnLaunch): nodes have no NAT and reach the internet through their public IPs, and EKS refuses the node group otherwise"
   type        = list(string)
 }
 

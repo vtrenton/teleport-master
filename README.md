@@ -1,29 +1,41 @@
 # Deploying
 
 ## Terraform Base
+OpenTofu (`tofu`; the lock file is OpenTofu's). The commands are the same
+with `terraform`.
 ```bash
 cd terraform/
-terraform init
-terraform plan
-terraform apply
+tofu init
+tofu plan
+tofu apply
 ```
 
 This also renders `teleport-cluster-values.yaml` (repo root) from
 `terraform/templates/teleport-cluster-values.yaml.tpl`, filling in the region,
 DynamoDB/S3 backend names, and IRSA role ARN for `chartMode: aws`. The file is
-generated, not tracked in git - re-run `terraform apply` after changing the
+generated, not tracked in git - re-run `tofu apply` after changing the
 relevant variables to regenerate it.
+
+**Subnets (`subnet_ids`) must auto-assign public IPv4 addresses**
+(`MapPublicIpOnLaunch`). There's no NAT gateway: nodes reach the internet
+(image pulls, Let's Encrypt, AWS APIs) through their own public IPs, and EKS
+refuses to create the node group otherwise (`Ec2SubnetInvalidConfiguration`).
+Inbound access is still only what the node security group allows. Set it once
+per subnet:
+```bash
+aws ec2 modify-subnet-attribute --region <region> --subnet-id <subnet> --map-public-ip-on-launch
+```
 
 ## Kubeconfig
 ```bash
-aws eks update-kubeconfig --region us-east-1 --name teleport-gateway
+$(tofu -chdir=terraform output -raw kubeconfig_command)
 ```
-Substitute `region`/`cluster_name` if you've overridden their defaults in
+Runs `aws eks update-kubeconfig` with the cluster's region and name from
 `terraform.tfvars`. Everything below this point (`kubectl`, `helm`) needs
 this run first.
 
-## DNS delegation (one-time, out of band - do this before the first `terraform apply`)
-This stack gets `terraform destroy`'d and rebuilt often, so the Route 53
+## DNS delegation (one-time, out of band - do this before the first `tofu apply`)
+This stack gets `tofu destroy`'d and rebuilt often, so the Route 53
 hosted zone is deliberately **not** managed by this Terraform project - a
 Terraform-owned zone gets brand new name servers every time it's recreated,
 which would mean re-delegating at the external DNS provider on every
@@ -37,7 +49,7 @@ aws route53 create-hosted-zone \
 Take the 4 name servers from that command's output (`DelegationSet.NameServers`)
 and, at whatever DNS provider currently hosts `trentonvanderwert.com`, add an
 NS record for `aws` pointing to them. This zone and its delegation now
-live independently of this stack - `terraform apply`/`terraform destroy` here
+live independently of this stack - `tofu apply`/`tofu destroy` here
 only look it up (via a data source) and never create, modify, or delete it.
 
 Note the Teleport hostname (`teleport.aws.trentonvanderwert.com`) lives *one
@@ -165,8 +177,14 @@ kubectl create secret generic license \
 
 ## Helm Install
 ```bash
-helm install teleport-cluster teleport/teleport-cluster --namespace teleport-cluster --create-namespace --values teleport-cluster-values.yaml
+helm install teleport-cluster teleport/teleport-cluster --version 18.11.8 --namespace teleport-cluster --create-namespace --values teleport-cluster-values.yaml
 ```
+Always pass `--version`: without it Helm installs the newest chart, which can
+be newer than the version the backend (DynamoDB) last ran. Use that version
+on a rebuild, and upgrade as a separate step, one major version at a time.
+Keep it in step with labconf's Managed Updates target
+(`teleport/resources/autoupdate.yaml`): agents are never newer than the
+cluster.
 
 ## First admin user
 The chart doesn't create any users. Bootstrap one via `tctl` inside the auth
@@ -192,7 +210,7 @@ gitignored) and an AWS
 Secrets Manager copy that survives even if this machine doesn't. The next
 `apply-teleport-cert.sh` run picks it back up automatically.
 
-Then uninstall the Helm release *before* `terraform destroy`:
+Then uninstall the Helm release *before* `tofu destroy`:
 ```bash
 helm uninstall teleport-cluster --namespace teleport-cluster
 ```

@@ -23,7 +23,7 @@
 #     --caller-reference "$(date +%s)"
 # ...delegate it (NS record at the external DNS provider, once, using the
 # name servers from that command's output)...and this data source just looks
-# it up. It survives every `terraform destroy` on this project untouched.
+# it up. It survives every `tofu destroy` on this project untouched.
 
 locals {
   zone_domain             = "${var.dns_subdomain}.${var.domain_name}"
