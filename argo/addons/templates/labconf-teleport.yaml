@@ -1,0 +1,47 @@
+# Teleport resources from labconf (teleport/resources/: roles, join tokens,
+# bots, ...), reconciled by the operator in the teleport-cluster chart
+# (operator.enabled), which only watches the release namespace.
+#
+# The chart's operator role allows nearly every Teleport kind; this
+# AppProject is what limits a merge to labconf to the kinds below, in that
+# namespace, nothing cluster-scoped.
+apiVersion: argoproj.io/v1alpha1
+kind: AppProject
+metadata:
+  name: labconf-teleport
+  namespace: argocd
+spec:
+  description: Teleport resources from labconf
+  sourceRepos:
+    - {{ .Values.labconf.repoURL | quote }}
+  destinations:
+    - server: https://kubernetes.default.svc
+      namespace: teleport-cluster
+  clusterResourceWhitelist: []
+  namespaceResourceWhitelist:
+    {{- range list "TeleportRoleV8" "TeleportProvisionToken" "TeleportBotV1" "TeleportWorkloadIdentityV1" "TeleportSAMLIdPServiceProviderV1" "TeleportAutoupdateConfigV1" "TeleportAutoupdateVersionV1" }}
+    - group: resources.teleport.dev
+      kind: {{ . }}
+    {{- end }}
+---
+# Prune on: removing a file in labconf deletes the resource in Teleport.
+# No resources-finalizer: deleting this Application leaves the resources (and
+# Teleport) alone.
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: labconf-teleport
+  namespace: argocd
+spec:
+  project: labconf-teleport
+  source:
+    repoURL: {{ .Values.labconf.repoURL | quote }}
+    targetRevision: {{ .Values.labconf.revision | quote }}
+    path: {{ .Values.labconf.path | quote }}
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: teleport-cluster
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true

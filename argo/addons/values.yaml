@@ -17,3 +17,10 @@ roles:
   lbc: ""
   externalDns: ""
   certManager: ""
+
+# Teleport resources reconciled by the teleport-cluster chart's operator
+# (templates/labconf-teleport.yaml)
+labconf:
+  repoURL: https://github.com/vtrenton/labconf
+  revision: master
+  path: teleport/resources

@@ -68,6 +68,16 @@ The controller gets `resource_tags` as `defaultTags`, so the NLB, target
 groups, and security groups it creates carry the same tags as everything
 Terraform creates.
 
+It also syncs labconf's Teleport resources (`teleport/resources/` in the labconf
+repo: roles, join tokens, bots, ...) into the `teleport-cluster` namespace,
+where the chart's operator (`operator.enabled`) reconciles them
+(`argo/addons/templates/labconf-teleport.yaml`). The `labconf-teleport`
+AppProject limits that source to the Teleport kinds listed there, in that
+namespace only: the operator's own role allows nearly every kind. Removing a
+file in labconf deletes the resource in Teleport. Never delete the
+`teleport-cluster` release's CRDs or these CRs while the operator runs: that
+deletes the real Teleport resources.
+
 Argo CD UI: `kubectl -n argocd port-forward svc/argocd-server 8080:443`, user
 `admin`, password from the `argocd-initial-admin-secret` Secret (the script
 prints the command).
