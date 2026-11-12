@@ -1,5 +1,5 @@
 apiVersion: v2
 name: addons
-description: Cluster add-ons and labconf's Teleport resources that Argo CD deploys (root Application, created by bootstrap/install-argocd.sh).
+description: Cluster add-ons and the Teleport resources (teleport-resources/) that Argo CD deploys (root Application, created by bootstrap/install-argocd.sh).
 type: application
 version: 0.1.0

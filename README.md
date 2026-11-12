@@ -80,13 +80,13 @@ The controller gets `resource_tags` as `defaultTags`, so the NLB, target
 groups, and security groups it creates carry the same tags as everything
 Terraform creates.
 
-It also syncs labconf's Teleport resources (`teleport/resources/` in the labconf
-repo: roles, join tokens, bots, ...) into the `teleport-cluster` namespace,
-where the chart's operator (`operator.enabled`) reconciles them
-(`argo/addons/templates/labconf-teleport.yaml`). The `labconf-teleport`
-AppProject limits that source to the Teleport kinds listed there, in that
+It also syncs the Teleport resources in [`teleport-resources/`](teleport-resources/README.md)
+(roles, join tokens, bots, ... for the labs) into the `teleport-cluster`
+namespace, where the chart's operator (`operator.enabled`) reconciles them
+(`argo/addons/templates/teleport-resources.yaml`). The `teleport-resources`
+AppProject limits that path to the Teleport kinds listed there, in that
 namespace only: the operator's own role allows nearly every kind. Removing a
-file in labconf deletes the resource in Teleport. Never delete the
+file there deletes the resource in Teleport. Never delete the
 `teleport-cluster` release's CRDs or these CRs while the operator runs: that
 deletes the real Teleport resources.
 
@@ -182,8 +182,8 @@ helm install teleport-cluster teleport/teleport-cluster --version 18.11.8 --name
 Always pass `--version`: without it Helm installs the newest chart, which can
 be newer than the version the backend (DynamoDB) last ran. Use that version
 on a rebuild, and upgrade as a separate step, one major version at a time.
-Keep it in step with labconf's Managed Updates target
-(`teleport/resources/autoupdate.yaml`): agents are never newer than the
+Keep it in step with the Managed Updates target
+(`teleport-resources/autoupdate.yaml`): agents are never newer than the
 cluster.
 
 ## First admin user

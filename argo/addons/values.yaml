@@ -18,9 +18,12 @@ roles:
   externalDns: ""
   certManager: ""
 
+# The branch this repo is deployed from: set by bootstrap/install-argocd.sh
+# (the root Application's own branch).
+revision: ""
+
 # Teleport resources reconciled by the teleport-cluster chart's operator
-# (templates/labconf-teleport.yaml)
-labconf:
-  repoURL: https://github.com/vtrenton/labconf
-  revision: master
-  path: teleport/resources
+# (templates/teleport-resources.yaml)
+teleportResources:
+  repoURL: https://github.com/vtrenton/teleport-master
+  path: teleport-resources

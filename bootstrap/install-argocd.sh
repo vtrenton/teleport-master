@@ -34,8 +34,10 @@ VALUES=$(jq -n \
   --arg lbc "$(tf -raw lbc_role_arn)" \
   --arg externalDns "$(tf -raw external_dns_role_arn)" \
   --arg certManager "$(tf -raw cert_manager_role_arn)" \
+  --arg revision "$REVISION" \
   '{clusterName: $clusterName, region: $region, vpcId: $vpcId, resourceTags: $resourceTags,
-    zoneDomain: $zoneDomain, roles: {lbc: $lbc, externalDns: $externalDns, certManager: $certManager}}')
+    zoneDomain: $zoneDomain, roles: {lbc: $lbc, externalDns: $externalDns, certManager: $certManager},
+    revision: $revision}')
 
 echo "Cluster:  $CLUSTER_NAME"
 echo "Region:   $REGION"

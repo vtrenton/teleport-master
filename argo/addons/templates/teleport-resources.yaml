@@ -1,19 +1,20 @@
-# Teleport resources from labconf (teleport/resources/: roles, join tokens,
-# bots, ...), reconciled by the operator in the teleport-cluster chart
-# (operator.enabled), which only watches the release namespace.
+# Teleport resources as code (teleport-resources/ in this repo: roles, join
+# tokens, bots, workload identities, SAML apps, Managed Updates), reconciled
+# by the operator in the teleport-cluster chart (operator.enabled), which
+# only watches the release namespace.
 #
 # The chart's operator role allows nearly every Teleport kind; this
-# AppProject is what limits a merge to labconf to the kinds below, in that
-# namespace, nothing cluster-scoped.
+# AppProject limits that path to the kinds below, in that namespace, nothing
+# cluster-scoped.
 apiVersion: argoproj.io/v1alpha1
 kind: AppProject
 metadata:
-  name: labconf-teleport
+  name: teleport-resources
   namespace: argocd
 spec:
-  description: Teleport resources from labconf
+  description: Teleport resources (teleport-resources/)
   sourceRepos:
-    - {{ .Values.labconf.repoURL | quote }}
+    - {{ .Values.teleportResources.repoURL | quote }}
   destinations:
     - server: https://kubernetes.default.svc
       namespace: teleport-cluster
@@ -24,20 +25,21 @@ spec:
       kind: {{ . }}
     {{- end }}
 ---
-# Prune on: removing a file in labconf deletes the resource in Teleport.
+# Prune on: removing a file deletes the resource in Teleport.
 # No resources-finalizer: deleting this Application leaves the resources (and
 # Teleport) alone.
 apiVersion: argoproj.io/v1alpha1
 kind: Application
 metadata:
-  name: labconf-teleport
+  name: teleport-resources
   namespace: argocd
 spec:
-  project: labconf-teleport
+  project: teleport-resources
   source:
-    repoURL: {{ .Values.labconf.repoURL | quote }}
-    targetRevision: {{ .Values.labconf.revision | quote }}
-    path: {{ .Values.labconf.path | quote }}
+    repoURL: {{ .Values.teleportResources.repoURL | quote }}
+    # The branch the root Application follows (bootstrap/install-argocd.sh)
+    targetRevision: {{ required "revision (re-run bootstrap/install-argocd.sh)" .Values.revision | quote }}
+    path: {{ .Values.teleportResources.path | quote }}
   destination:
     server: https://kubernetes.default.svc
     namespace: teleport-cluster
